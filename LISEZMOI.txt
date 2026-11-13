@@ -1,0 +1,9 @@
+ZHEROES — version web (itch.io)
+
+Mise en ligne sur itch.io :
+1. Créer un projet, type « HTML ».
+2. Envoyer ce zip tel quel, cocher « This file will be played in the browser ».
+3. Taille conseillée : 1000 × 900, cocher « Fullscreen button » et « Mobile friendly ».
+
+Jeu en ligne : un joueur clique sur « Jouer en ligne » puis « Héberger » et partage le code ;
+l'autre joueur entre le code. Le tournoi à 4 se lance quand 4 joueurs sont connectés.
