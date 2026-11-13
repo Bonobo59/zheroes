@@ -131,6 +131,7 @@ button.act:disabled{animation:none}
 .sc-kicker{font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
 .sc-title{font-family:'Permanent Marker';font-size:clamp(22px,4.6vw,36px);line-height:1.25;background:linear-gradient(transparent 52%,#ffe27a 52% 88%,transparent 88%);padding:0 8px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .sc-head{margin-bottom:6px}
+.sc-next{margin:8px 0 2px}
 .sc-plates{display:flex;gap:10px;justify-content:center;align-items:stretch;margin:16px 0 14px}
 .sc-plate{flex:1;max-width:250px;position:relative;background:#fff;border:3px solid var(--ink);border-top-width:9px;border-radius:12px;padding:8px 6px 6px;box-shadow:3px 3px 0 var(--ink)}
 .sc-plate.p0{border-top-color:var(--atk);background:linear-gradient(#e7f4f5,#fff 60%)}
@@ -350,6 +351,12 @@ body:has(.board) .wrap{padding:4px}
 .dp3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:600px;margin:0 auto}
 .dpcard .dot:not([data-act=al]){pointer-events:none}
 .dpcard .dot:not([data-act=al]):hover{box-shadow:none!important}
+.alpick3{display:flex;justify-content:center;gap:6px;margin-top:6px}
+.alpick3 .alb{width:46px;height:46px;padding:4px;border:3px solid var(--ink);border-radius:10px;background:#fff;box-shadow:2px 2px 0 rgba(0,0,0,.25);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.alpick3 .alb img{width:100%;height:100%;object-fit:contain;pointer-events:none}
+.alpick3 .alb.on{background:#ffd34d;transform:translateY(-2px);box-shadow:0 0 0 3px #e2604b,2px 4px 0 rgba(0,0,0,.3)}
+.alpick3 .alb:disabled{opacity:.22;filter:grayscale(1);cursor:not-allowed;box-shadow:none}
+@media (max-width:600px){.alpick3{gap:3px}.alpick3 .alb{width:34px;height:34px;padding:2px;border-width:2px}}
 .dpcard.alpick .dot[data-act=al]:not(.on){box-shadow:0 0 0 2px rgba(226,96,75,.9);animation:pulse 1.4s infinite}
 
 .sttabs button{font-size:15px}
@@ -1252,6 +1259,7 @@ function logHTML(){ if(MOB()&&!UI.logOpen) return `<button class="logtog" data-a
 
 function render(){
   if(typeof hideHover==='function') hideHover();
+  if(S&&S.ai&&S.phase==='draft') setTimeout(campDraftKick,60);
   useSet(S&&S.set?S.set:(TT.on&&TT.T&&TT.T.set)?TT.T.set:(S||TT.on)?'base':curSetPref());
   if(UI.tuto) return;
   const app=$('#app');
@@ -1519,7 +1527,7 @@ function endHTML(){
     <div class="paper center dvpaper">${deckViewHTML(S.players.map((p,i)=>({name:p.name,cs:p.cs,me:i===ME(),trk:p.trk,trkM:p.trkM})),wi>=0?wi:null)}</div>`;
   }
   const lw=last.vp[0]>last.vp[1]?0:last.vp[1]>last.vp[0]?1:-1;
-  return `<div class="scorecard"><div class="sc-head"><div class="sc-kicker">Fin de la partie ${last.game}/6</div><span class="sc-title">${last.winner?esc(last.winner)+' gagne la partie !':'Égalité !'}</span></div>
+  return `<div class="scorecard"><div class="sc-head"><div class="sc-kicker">Fin de la partie ${last.game}/6</div><span class="sc-title">${last.winner?esc(last.winner)+' gagne la partie !':'Égalité !'}</span><div class="sc-next">${isGuest()?'<b>L’hôte lance la partie suivante…</b>':`<button class="primary" data-act="nextgame">Lancer la partie ${S.game+1}</button>`}</div></div>
     <div class="sc-plates">${S.players.map((p,i)=>plateHTML(p,i,last.vp[i],`<b>${p.pc} pts de classement</b> · ${st[i]} ⭐ au total`,lw===i)).join('<div class="sc-vs">VS</div>')}</div>
     ${tbl}
     ${cocheGameHTML(last.game)}
@@ -1690,14 +1698,14 @@ async function animateExchange(){
   await sleep(300);
 }
 function boardKeys(){const m={};document.querySelectorAll('#app .board .zc[data-pl][data-id]').forEach(el=>{if(el.dataset.pl!==''){const k=el.dataset.pl+'-'+el.dataset.id; if(!m[k]) m[k]=el.getBoundingClientRect();}});return m;}
-async function flipRender(){
+async function flipRender(dur=600){
   const before=boardKeys(); render(); const an=[];
   document.querySelectorAll('#app .board .zc[data-pl][data-id]').forEach(el=>{
     const k=el.dataset.pl+'-'+el.dataset.id, b=before[k]; if(!b) return;
     const a=el.getBoundingClientRect(); const dx=b.left-a.left, dy=b.top-a.top, s=b.width/a.width;
     if(Math.abs(dx)<1&&Math.abs(dy)<1&&Math.abs(s-1)<.01) return;
     el.style.zIndex=7;
-    an.push(el.animate([{transformOrigin:'top left',transform:`translate(${dx}px,${dy}px) scale(${s})`},{transformOrigin:'top left',transform:'none'}],{duration:600,easing:'ease-in-out'}).finished.then(()=>el.style.zIndex=''));
+    an.push(el.animate([{transformOrigin:'top left',transform:`translate(${dx}px,${dy}px) scale(${s})`},{transformOrigin:'top left',transform:'none'}],{duration:dur*SPD,easing:'ease-in-out'}).finished.then(()=>el.style.zIndex=''));
   });
   await Promise.all(an);
 }
@@ -1707,7 +1715,7 @@ async function showDeaths(beforeKeys){
   if(!dead.length){ render(); return; }
   dead.forEach(k=>{const [pl,id]=k.split('-'); const el=cardEl(pl,id); if(el){el.classList.add('dying'); el.insertAdjacentHTML('beforeend','<span class="kobadge">KO</span>');}});
   UI.deathBusy=true;
-  try{ await sleep(650); await flipRender(); } finally{ UI.deathBusy=false; }
+  try{ await sleep(520); await flipRender(400); } finally{ UI.deathBusy=false; }
 }
 function markHide(k){ UI.hideTok=new Set(); S.players.forEach((p,pl)=>{ const u=p.line[k]; if(u&&u.rev) UI.hideTok.add(pl+'-'+u.id); }); }
 async function countUpReveal(k){
@@ -2711,9 +2719,14 @@ function soloStart(mode,n){
 function soloAI(){ // l'hôte joue les sièges IA (hors ligne comme en ligne)
   const T=TT.T; if(!TT.isHost||!T) return;
   const AIS=tSeats().filter(isAI); if(!AIS.length) return;
-  if(T.phase==='draft'&&T.draft){ const r=T.draft.round;
-    for(const s of AIS){ const D=TT.T.draft; if(!D||D.round!==r) break; if(D.picks[s]!=null) continue;
-      const keep=AIW; AIW=Object.assign({},AIW_BASE,AIPRESET[T.aiLevel||TT.aiLevel||'normal']||{}); let best; try{ best=aiDraftSim(D.decks[s].slice(),D.packs[s]); } finally{ AIW=keep; } tourPick(s,r,best); } return; }
+  if(T.phase==='draft'&&T.draft){ const r=T.draft.round, run=T.draft;
+    if(UI.tdRun===run&&UI.tdRound===r) return; UI.tdRun=run; UI.tdRound=r;
+    const aw=Object.assign({},AIW_BASE,AIPRESET[T.aiLevel||TT.aiLevel||'normal']||{});
+    (async()=>{ for(const s of AIS){ const D=TT.T&&TT.T.draft; if(D!==run||D.round!==r) break; if(D.picks[s]!=null) continue;
+        const best=await aiDraftAsync('t'+s+'-'+r,D.decks[s],D.packs[s],aw);
+        const D2=TT.T&&TT.T.draft; if(D2!==run||D2.round!==r||D2.picks[s]!=null) break; tourPick(s,r,best); }
+      if(UI.tdRun===run&&UI.tdRound===r){ UI.tdRun=null; } })();
+    return; }
   if(T.phase==='dprep'&&T.dpChoice){ for(const s of AIS){ if(TT.T.phase!=='dprep'||!TT.T.dpChoice||TT.T.dpChoice[s]) continue;
       const deck=TT.T.dpDecks[s]; const ids=deck.slice().sort((a,b)=>(DEF[b].c1*1.3+aiCardValue(b)*0.4)-(DEF[a].c1*1.3+aiCardValue(a)*0.4)).slice(0,3);
       const al={}; shuffle(['S','E','L']).forEach((k,i)=>al[ids[i]]=k); tourDP(s,{ids,al}); } return; }
@@ -2812,10 +2825,9 @@ function tourHTML(){
   if(T.phase==='standings'){
     const left=Math.max(0,Math.ceil((T.startAt-Date.now())/1000));
     return `<div class="paper" style="margin-top:10px">${lost}<h2>${T.round===0?'🏆 Le tournoi commence !':'Classement après la partie '+T.round}</h2>
+      <div class="center" style="margin:4px 0 10px">${TT.isHost?`<button class="primary" data-act="t4go">Lancer la partie ${T.round+1}</button> `:''}<span class="muted">Début dans <b>${left}</b> s</span></div>
       ${T.round>0?tourTable():''}
-      <h3 style="margin-top:14px">Partie ${T.round+1}/6 — prochains duels</h3>${duelsHTML(T.round)}
-      <p class="center" style="margin-top:10px">Début dans <b>${left}</b> s</p>
-      ${TT.isHost?'<div class="center"><button class="primary" data-act="t4go">Lancer maintenant</button></div>':''}</div>`;
+      <h3 style="margin-top:14px">Partie ${T.round+1}/6 — prochains duels</h3>${duelsHTML(T.round)}</div>`;
   }
   if(T.phase==='play'){
     return `<div class="paper center" style="margin-top:10px">${lost}<h2>Partie ${T.round+1}/6</h2>${duelsHTML(T.round)}<p class="muted">Préparation du duel…</p></div>`;
@@ -2861,10 +2873,9 @@ function dpHTML(key,kind,deck,title){
     act=MOB()?'':`<button class="primary" data-act="dpnext" ${D.sel.length===3?'':'disabled'}>Valider ces 3 héros</button>`;
   } else {
     const used=Object.values(D.al);
-    body=`<p class="center" style="margin:0 0 4px">${D.step==='anim'?'Tes 3 héros reçoivent +1 ATK, +1 ♥ et leur pouvoir I…':'Touche une allégeance sur chaque héros : les 3 doivent être différentes.'}</p>
+    body=`${D.step==='anim'?'<p class="center" style="margin:0 0 4px">Tes 3 héros reçoivent +1 ATK, +1 ♥ et leur pouvoir I…</p>':''}
       <div class="dp3">${D.step==='al'&&MOB()&&D.sel.every(id=>D.al[id])?'<div class="dcwrap"><button class="dcenter" data-act="dpok">✔ Valider</button></div>':''}${D.sel.map(id=>`<div>${cardHTML(null,id,{cs:dpCardState(id),cls:'dpcard'+(D.step==='al'?' alpick':''),ia:D.step==='al'})}
-        <div class="lbl center">${D.al[id]?'<b>'+AL_NAMES[D.al[id]]+'</b>':(D.step==='al'?'<span class="muted">à choisir</span>':'')}</div></div>`).join('')}</div>
-      ${D.step==='al'?`<p class="center muted" style="font-size:14px;margin:4px 0 0">Déjà prises : ${used.length?used.map(k=>AL_NAMES[k]).join(', '):'aucune'}</p>`:''}`;
+        ${D.step==='al'?`<div class="alpick3">${['S','L','E'].map(k=>{ const own=D.al[id]===k, taken=!own&&used.includes(k); return `<button class="alb ${own?'on':''}" data-act="dpal" data-id="${id}" data-key="${k}" ${taken?'disabled':''} title="${AL_NAMES[k]}"><img src="al${k}.png" alt="${AL_NAMES[k]}"></button>`; }).join('')}</div>`:''}</div>`).join('')}</div>`;
     act=D.step==='al'&&!MOB()?`<button class="primary" data-act="dpok" ${D.sel.every(id=>D.al[id])?'':'disabled'}>Valider mes héros</button>`:'';
   }
   if(D.step==='anim'&&!D.animStarted){ D.animStarted=true; setTimeout(dpAnimate,350); }
@@ -3160,7 +3171,7 @@ function draftEndRound(D){
 }
 function draftDirHTML(D){ if(!D||!D.packs||!D.packs[2]) return ''; return ` · <span title="Sens de rotation des paquets">${D.dir===1?'↻ sens horaire':'↺ sens anti-horaire'}</span>`; }
 // draft par simulation : chaque carte du paquet est testée dans des manches simulées avec les cartes déjà prises (banc : 74 % contre l'ancien draft)
-function aiDraftSim(mine,pack){
+function* aiDraftGen(mine,pack){ // générateur : rend la main après chaque simulation (calcul en arrière-plan)
   const all=DEFS.map(c=>c.id), K=Math.max(1,AIW.dk||16), fresh={}; all.forEach(id=>fresh[id]=newCardState(id));
   const base={phase:'reveal',mode:'sealed',game:1,manche:1,players:[0,1].map(i=>({name:'IA'+i,cs:fresh,deck:[],hand:[],line:[],ko:[],discard:[],vp:0,pc:0})),log:[],pending:[],step:0,turn:0,results:[],revived:{}};
   const M=[]; for(let i=0;i<K;i++){ const pool=mine.length>=3?mine:mine.concat(shuffle(all.filter(x=>!mine.includes(x))).slice(0,3-mine.length)); M.push([shuffle(pool).slice(0,3),shuffle(all).slice(0,4),Math.floor(Math.random()*4)]); }
@@ -3168,17 +3179,40 @@ function aiDraftSim(mine,pack){
   for(const c of pack){ let s=0;
     for(const [three,opp,pos] of M){ const me=three.filter(x=>x!==c).slice(0,3); while(me.length<3) me.push(shuffle(all.filter(x=>x!==c&&!me.includes(x)))[0]); me.splice(pos,0,c);
       const o=opp.filter(x=>!me.includes(x)); while(o.length<4) o.push(shuffle(all.filter(x=>!me.includes(x)&&!o.includes(x)))[0]);
-      const r=simManche(base,o,me); s+=(r.vp[1]-r.vp[0])+0.35*(r.ch[1]-r.ch[0]); }
+      const r=simManche(base,o,me); s+=(r.vp[1]-r.vp[0])+0.35*(r.ch[1]-r.ch[0]); yield null; }
     s=s/K+Math.random()*(0.01+AIW.noise);
     if(AIW.alTheme&&mine.length>=2){ const R=alRefs(), th=alTheme(mine); if(th&&R[c]&&(th.some(k=>R[c][k])||R[c].any)) s+=AIW.alTheme; else if(!th&&R[c]) s+=AIW.alTheme*0.5; }
     if(AIW.alDraft){ const R=alRefs(), frac=mine.filter(x=>R[x]).length/Math.max(3,mine.length); s+=AIW.alDraft*(R[c]?0.5+frac:frac*0.3); }
     if(s>bs){ bs=s; best=c; } }
   return best;
 }
+function aiDraftSim(mine,pack){ const g=aiDraftGen(mine,pack); let r; do{ r=g.next(); }while(!r.done); return r.value; }
+// version asynchrone : quelques ms de calcul puis on laisse respirer l'interface (le joueur peut choisir pendant ce temps)
+const DSIM={cache:{},jobs:{}};
+const dsimKey=(tag,mine,pack)=>tag+'|'+mine.join(',')+'|'+pack.slice().sort((a,b)=>a-b).join(',');
+function aiDraftAsync(tag,mine,pack,aw){
+  const key=dsimKey(tag,mine,pack);
+  if(key in DSIM.cache) return Promise.resolve(DSIM.cache[key]);
+  if(DSIM.jobs[key]) return DSIM.jobs[key];
+  const g=(()=>{ const k=AIW; AIW=aw; try{ return aiDraftGen(mine.slice(),pack.slice()); } finally{ AIW=k; } })();
+  return DSIM.jobs[key]=new Promise(res=>{
+    const step=()=>{ const k=AIW; AIW=aw; let r; const t0=performance.now();
+      try{ do{ r=g.next(); }while(!r.done&&performance.now()-t0<14); } catch(e){ console.error(e); r={done:true,value:pack[0]}; } finally{ AIW=k; }
+      if(r.done){ DSIM.cache[key]=r.value; delete DSIM.jobs[key]; const ks=Object.keys(DSIM.cache); if(ks.length>60) delete DSIM.cache[ks[0]]; res(r.value); }
+      else setTimeout(step,8); };
+    setTimeout(step,0); });
+}
+function campDraftKick(){ // campagne contre l'IA : l'IA prépare son choix pendant que le joueur choisit
+  if(!S||!S.ai||NET.on||UI.tuto||S.phase!=='draft'||!S.draft||S.draft.turn!==0) return;
+  const D=S.draft; if(!D.packs[AIP]||!D.packs[AIP].length) return;
+  aiUseLevel(); aiDraftAsync('c'+S.game+'-'+D.round,P(AIP).deck,D.packs[AIP],Object.assign({},AIW));
+}
 function aiDraftChoose(pack){ return aiDraftSim(P(AIP).deck.slice(),pack); }
 function aiDraftPick(){
   const D=S.draft, pack=D.packs[AIP];
-  const best=aiDraftChoose(pack);
+  const key=dsimKey('c'+S.game+'-'+D.round,P(AIP).deck,pack);
+  if(!(key in DSIM.cache)){ if(!UI.dWait){ UI.dWait=true; aiDraftAsync('c'+S.game+'-'+D.round,P(AIP).deck,pack,Object.assign({},AIW)).then(()=>{ UI.dWait=false; if(S&&S.phase==='draft'&&S.draft===D&&D.turn===AIP) aiDraftPick(); }); } return; }
+  const best=DSIM.cache[key];
   stDraftPick(S.stc,AIP,D.round+1,best,pack);
   P(AIP).deck.push(best); D.packs[AIP]=pack.filter(x=>x!==best); D.picked=[];
   draftEndRound(D); D.turn=0;
@@ -3379,7 +3413,7 @@ function aiTurnWaiting(){
   return (S.phase==='draft'&&S.draft&&S.draft.turn===AIP)||(S.phase==='dprep'&&S.turn===AIP)||(S.phase==='place'&&S.turn===AIP)||(S.phase==='coche'&&S.coche&&S.coche.pl===AIP);
 }
 function aiThinkingHTML(){ return `<div class="paper center" style="padding:40px 10px"><div style="font-size:46px">🤖</div><h2>${esc(P(AIP).name)} réfléchit…</h2></div>`; }
-function scheduleAI(){ if(!S||!S.ai||UI.aiT||UI.tuto) return; UI.aiT=setTimeout(()=>{ UI.aiT=null; aiTick(); },650); }
+function scheduleAI(){ if(!S||!S.ai||UI.tuto) return; if(UI.aiT&&!(S.phase==='draft'&&S.draft&&S.draft.turn===AIP&&!UI.aiFast)) return; let dl=650; try{ if(S.phase==='draft'&&S.draft&&S.draft.turn===AIP&&(dsimKey('c'+S.game+'-'+S.draft.round,P(AIP).deck,S.draft.packs[AIP]) in DSIM.cache)) dl=150; }catch(e){} if(UI.aiT){ if(dl===650) return; clearTimeout(UI.aiT); } UI.aiFast=dl===150; UI.aiT=setTimeout(()=>{ UI.aiT=null; UI.aiFast=false; aiTick(); },dl); }
 function aiTick(){
   if(!S||!S.ai||UI.tuto||NET.on) return;
   aiUseLevel();
@@ -3573,6 +3607,7 @@ document.addEventListener('click',e=>{
     case 'stjson': copyText(JSON.stringify(statsAll())); return;
     case 'stclear': if(UI.stArm){ statsWrite([]); UI.stArm=false; toast('Statistiques effacées.'); render(); } else { UI.stArm=true; toast('Clique encore une fois sur « Effacer les statistiques » pour confirmer.'); } return;
     case 'sturl': { const v=($('#sturl')||{}).value||''; try{ if(v.trim()) localStorage.setItem('zheroes_sheet_url',v.trim()); else localStorage.removeItem('zheroes_sheet_url'); }catch(e){} statsSendPending(); toast(v.trim()?'Adresse enregistrée : les campagnes seront envoyées au Google Sheet.':'Envoi désactivé.'); render(); return; }
+    case 'dpal': dpClickAl(+t.dataset.id,t.dataset.key); return;
     case 'dpsel': { const D=UI.dp; if(!D||D.step!=='pick') return; const id=+t.dataset.id; if(D.sel.includes(id)) D.sel=D.sel.filter(x=>x!==id); else if(D.sel.length<3) D.sel.push(id); render(); return; }
     case 'dppage': if(UI.dp){ UI.dp.page+=+t.dataset.d; render(); } return;
     case 'dpnext': if(UI.dp&&UI.dp.sel.length===3){ UI.dp.step='anim'; UI.dp.animStarted=false; UI.dp.animDone={}; render(); scrollTop0(); } return;
