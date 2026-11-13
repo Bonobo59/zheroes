@@ -165,7 +165,12 @@ body.mob .stbl th{font-size:12.5px;padding:5px 2px} body.mob .stbl td{padding:4p
 body.mob .dvgrid{grid-template-columns:repeat(4,1fr);gap:4px}
 body.mob .dvarr{padding:4px 5px;font-size:17px}
 .dvstats{max-width:520px;margin:0 auto 16px}
-.dvcar .dvgrid{grid-template-columns:repeat(3,1fr)!important;max-width:720px}
+.dvgrid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:620px;margin:0 auto}
+body.mob .dvgrid2{gap:8px}
+.sc-plate .pts{font-size:.45em;margin-left:4px;align-self:flex-end;padding-bottom:6px}
+.sc-plate .ptsl{font-size:13px;margin-top:-4px;font-weight:bold}
+.stbl tr.tot.pcm td{background:#ffd84a!important;font-size:20px;border-top:3px solid var(--ink)}
+.stbl tr.tot.st td{background:#fff8dc!important;font-size:15px;font-family:inherit;border-top:1.5px dashed var(--ink)}
 .stbl.cg{margin-top:14px}
 .dvstats tr.pm td{font-size:13.5px;padding-top:1px;padding-bottom:1px}
 .dvstats{box-sizing:border-box;width:100%!important}
@@ -1320,10 +1325,7 @@ function deckViewHTML(decks,wi){ // decks:[{name,cs,me,trk}], wi = index du deck
     ${sec('Types de cartes')}${st('💀 Cartes MORT','mort')}${st('⚡ Cartes FLASH','flash')}${st('✏️ Cartes à dessin','dess')}
     ${sec('Allégeances')}${st('☀ Soleil','S')}${st('★ Étoile','E')}${st('☾ Lune','L')}
     ${st('☀ + ★','SE')}${st('☀ + ☾','SL')}${st('★ + ☾','EL')}${st('☀ ★ ☾ (full)','full')}</table></div>
-    <div class="dvcar"><button class="dvarr" data-act="dvpage" data-d="-1" ${pages<2?'disabled':''}>◀</button>
-      <div class="dvgrid">${ids.slice(pg*3,pg*3+3).map(id=>`<div class="cardwrap">${cardHTML(null,id,{cs:D.cs[id],open:true})}</div>`).join('')}</div>
-      <button class="dvarr" data-act="dvpage" data-d="1" ${pages<2?'disabled':''}>▶</button></div>
-    <div class="dvdots">${Array.from({length:pages},(_,i)=>`<span class="${i===pg?'on':''}"></span>`).join('')}</div>
+    <div class="dvgrid2">${ids.map(id=>`<div class="cardwrap">${cardHTML(null,id,{cs:D.cs[id],open:true})}</div>`).join('')}</div>
 </div>`;
 }
 function statsHTML(pl){
@@ -1377,8 +1379,8 @@ function cocheGameHTML(g){
     <tr><td colspan="3" class="ssec">Gagnées en jeu (pouvoirs)</td></tr>
     ${[['⚔ ATK','gA'],['♥ VIE','gV'],['☀★☾ Allégeances','gL']].map(([l,k])=>`<tr><td>${l}</td>${H.map(h=>`<td>${v(h,k)}</td>`).join('')}</tr>`).join('')}</table>`;
 }
-function plateHTML(p,i,big,sub,win){ return `<div class="sc-plate p${i} ${win?'win':''}"><div class="nm">${esc(p.name)}${i===ME()&&!TT.on?' <span class="muted">(vous)</span>':''}</div>
-  <div class="big">${big}<img src="star.webp" alt=""></div><div class="sub">${sub}</div></div>`; }
+function plateHTML(p,i,big,sub,win,pts){ return `<div class="sc-plate p${i} ${win?'win':''}"><div class="nm">${esc(p.name)}${i===ME()&&!TT.on?' <span class="muted">(vous)</span>':''}</div>
+  <div class="big">${big}${pts?'<span class="pts">pts</span>':'<img src="star.webp" alt="">'}</div>${pts?'<div class="ptsl">de classement</div>':''}<div class="sub">${sub}</div></div>`; }
 function endHTML(){
   if(TT.on&&S.tour){ const r=S.results[S.results.length-1]; const wv=r.vp[0]>r.vp[1]?0:r.vp[1]>r.vp[0]?1:-1;
     return `<div class="scorecard"><div class="sc-head"><span class="sc-title">${r.winner?esc(r.winner)+' gagne ce duel':'Égalité'}</span><div class="muted">Partie ${S.game}/6 · Table ${S.tour.table}</div></div>
@@ -1388,19 +1390,19 @@ function endHTML(){
   const end=S.phase==='campaignEnd';
   const tbl=`<table class="stbl"><tr><th>Partie</th><th class="c0">${esc(a.name)}</th><th class="c1">${esc(b.name)}</th><th>Vainqueur</th></tr>
      ${S.results.map(r=>{ const w=r.vp[0]>r.vp[1]?0:r.vp[1]>r.vp[0]?1:-1; return `<tr><td>${r.game}</td><td class="${w===0?'w':''}">${r.vp[0]}</td><td class="${w===1?'w':''}">${r.vp[1]}</td><td>${r.winner?esc(r.winner):'Égalité'}</td></tr>`; }).join('')}
-     <tr class="tot"><td>Total ⭐</td><td>${st[0]}</td><td>${st[1]}</td><td>${st[0]-st[1]>0?'+':''}${st[0]-st[1]}</td></tr>
-     <tr class="tot pc"><td>Classement</td><td>${a.pc}</td><td>${b.pc}</td><td></td></tr></table>`;
+     <tr class="tot pcm"><td>🏆 Points de classement</td><td>${a.pc}</td><td>${b.pc}</td><td>${a.pc-b.pc>0?'+':''}${a.pc-b.pc}</td></tr>
+     <tr class="tot st"><td>Total ⭐</td><td>${st[0]}</td><td>${st[1]}</td><td>${st[0]-st[1]>0?'+':''}${st[0]-st[1]}</td></tr></table>`;
   if(end){
     const wi=a.pc>b.pc?0:b.pc>a.pc?1:st[0]>st[1]?0:st[1]>st[0]?1:-1, w=wi>=0?S.players[wi].name:null; const tb=a.pc===b.pc&&w;
     return `<div class="scorecard final"><div class="sc-head"><div class="sc-kicker">Fin de la campagne</div><span class="sc-title">${w?'🏆 '+esc(w)+' remporte la campagne !':'Égalité parfaite !'}</span>
       ${tb?'<p class="muted">Égalité aux points de classement : départagé au nombre total d’étoiles.</p>':''}</div>
-      <div class="sc-plates">${S.players.map((p,i)=>plateHTML(p,i,st[i],`${p.pc} pts de classement`,wi===i)).join('<div class="sc-vs">VS</div>')}</div>
+      <div class="sc-plates">${S.players.map((p,i)=>plateHTML(p,i,p.pc,`${st[i]} ⭐ gagnées au total`,wi===i,true)).join('<div class="sc-vs">VS</div>')}</div>
       ${tbl}<div class="spacer"></div><button class="primary" data-act="${NET.on?'nhome':'endmenu'}">${NET.on?'Retour au menu principal':'Nouvelle campagne'}</button></div>
     <div class="paper center dvpaper">${deckViewHTML(S.players.map((p,i)=>({name:p.name,cs:p.cs,me:i===ME(),trk:p.trk,trkM:p.trkM})),wi>=0?wi:null)}</div>`;
   }
   const lw=last.vp[0]>last.vp[1]?0:last.vp[1]>last.vp[0]?1:-1;
   return `<div class="scorecard"><div class="sc-head"><div class="sc-kicker">Fin de la partie ${last.game}/6</div><span class="sc-title">${last.winner?esc(last.winner)+' gagne la partie !':'Égalité !'}</span></div>
-    <div class="sc-plates">${S.players.map((p,i)=>plateHTML(p,i,last.vp[i],`Total : ${st[i]} ⭐ · ${p.pc} pts`,lw===i)).join('<div class="sc-vs">VS</div>')}</div>
+    <div class="sc-plates">${S.players.map((p,i)=>plateHTML(p,i,last.vp[i],`<b>${p.pc} pts de classement</b> · ${st[i]} ⭐ au total`,lw===i)).join('<div class="sc-vs">VS</div>')}</div>
     ${tbl}
     ${cocheGameHTML(last.game)}
     <p class="muted">Les cartes défaussées sont mélangées pour reformer chaque deck. Les coches sont conservées.</p>
