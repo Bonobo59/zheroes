@@ -571,8 +571,8 @@ function cs(pl,id){return P(pl).cs[id];}
 function logm(t){S.log.unshift(t); if(S.log.length>80) S.log.length=80;}
 const powOn=(pl,id,n)=>{const d=DEF[id],c=cs(pl,id); return n===1? (d.c1>0&&c.p1>=d.c1) : (d.c2>0&&c.p2>=d.c2);};
 
-function newCampaign(names,mode){
-  useSet(curSetPref());
+function newCampaign(names,mode,set){
+  useSet(set||curSetPref());
   S={set:SETNAME,t0:Date.now(),phase:'setup',mode,game:1,manche:1,players:names.map(n=>({name:n||'Joueur',cs:{},deck:[],line:[],ko:[],discard:[],vp:0,pc:0})),
      log:[],pending:[],step:0,turn:0,draft:null,coche:null,results:[]};
   S.stc=stNew(mode,NET.on?'online2':'local',S.players.map(p=>p.name)); S.stc.set=S.set;
@@ -1147,7 +1147,7 @@ function chronoTxt(){ if(!S) return '0:00'; const t0=campT0(); const end=(S.phas
 setInterval(()=>{ const el=document.querySelector('[data-chrono]'); if(el&&S) el.textContent='⏱ '+chronoTxt(); },1000);
 function topbar(){
   const ph={build:'Construction',pool:'Pool',dprep:'Préparation',draft:'Draft',prep:'Préparation',place:'Positionnement',reveal:'Révélation',combat:'Combats',coche:'Coche',gameEnd:'Fin de partie',campaignEnd:'Fin de campagne'}[S.phase]||'';
-  return `<div class="topbar"><img class="toplogo" src="logo.webp" alt="Zheroes First Draft"><span>${NET.on?`<span class="onl">${S.tour?'🏆 Table '+S.tour.table+' · ':'🌐 '}${esc(P(OPP()).name)}</span> · `:''}<span class="tchips"><span class="tchip">${MOB()?'P':'Partie '}${S.game}/6</span><span class="tchip">${MOB()?'M':'Manche '}${S.manche}/3</span><span class="tchip ph">${ph}</span><span class="tchip clk" data-chrono>⏱ ${chronoTxt()}</span></span></span>
+  return `<div class="topbar"><img class="toplogo" src="logo.webp" alt="Zheroes First Draft"><span>${NET.on?`<span class="onl">${S.tour?'🏆 Table '+S.tour.table+' · ':'🌐 '}${esc(P(OPP()).name)}</span> · `:''}<span class="tchips">${S.set==='test'?`<span class="tchip" title="SET test équilibrage" style="background:#ffe1a8">🧪${MOB()?'':' SET test'}</span>`:''}<span class="tchip">${MOB()?'P':'Partie '}${S.game}/6</span><span class="tchip">${MOB()?'M':'Manche '}${S.manche}/3</span><span class="tchip ph">${ph}</span><span class="tchip clk" data-chrono>⏱ ${chronoTxt()}</span></span></span>
     <span class="row">${MOB()?'<button data-act="rules" title="Règles">📖</button><button data-act="cat" title="Cartes">🃏</button><button data-act="menu" title="Menu">☰</button>':'<button data-act="rules">Règles</button><button data-act="cat">Cartes</button><button data-act="menu">Menu</button>'}</span></div>`;
 }
 function scoreRow(pl){
@@ -2230,7 +2230,7 @@ function lbyStatusHTML(){
 function lbyMineHTML(){
   if(TT.on&&!TT.solo&&TT.isHost&&TT.T&&TT.T.phase==='lobby'){ const n=TT.T.names.filter(Boolean).length, N=TT.T.n||4;
     return `<div class="netbox mine"><h3>🟡 Ta table — Tournoi ${N} joueurs ${({t4s:'scellé',t4d:'draft',t4b:'construit',t4p:'pool'}[NET.mode]||'')}</h3>
-      <p style="margin:2px 0">Code <b>${esc(NET.code)}</b> · ${n}/${N} joueurs : ${TT.T.names.filter(Boolean).map(esc).join(', ')}</p>
+      <p style="margin:2px 0">Code <b>${esc(NET.code)}</b> · ${SET_LBL[TT.T.set||'base']} · ${n}/${N} joueurs : ${TT.T.names.filter(Boolean).map(esc).join(', ')}</p>
       ${n<N?`<p style="margin:2px 0;font-size:14px">Les places libres seront prises par des IA au lancement. <label>Niveau : <select id="t4lvl">${['facile','normal','difficile'].map(k=>`<option value="${k}" ${(TT.aiLevel||'normal')===k?'selected':''}>${AILVL_LBL[k]}</option>`).join('')}</select></label></p>`:''}
       <div class="row" style="flex-wrap:wrap"><button class="primary" data-act="t4start">Lancer le tournoi${n<N?` (${N-n} IA)`:''}</button><button data-act="nleave">Fermer ma table</button></div></div>`; }
   if(NET.on&&NET.host&&!S){
@@ -2276,7 +2276,7 @@ function lbyToast(msg){ const el=document.createElement('div'); el.className='lb
 function lbyCreate(){ // crée une table selon le format et le nombre de joueurs choisis
   const f=$('#nmode')?$('#nmode').value:'sealed', n=$('#nsize')?+$('#nsize').value:2; NET.tsize=n;
   if(n>2){ tourHost(f==='draft'?'t4d':'t4s',n); return; }
-  NET.mode=f; hostTable(null);
+  NET.mode=f; NET.set=curSetPref(); hostTable(null);
 }
 function lbyQuick(){
   const m=$('#nmode')?$('#nmode').value:(NET.mode||'sealed'); NET.mode=m;
@@ -2305,7 +2305,7 @@ setInterval(()=>{
 function hostTable(code,resumeS){
   const name=($('#nname')&&$('#nname').value.trim())||myName()||'Hôte'; setMyName(name);
   const mode=$('#nmode')?$('#nmode').value:(NET.mode||'sealed');
-  NET.on=true; NET.host=true; NET.me=0; NET.code=code||newCode(); NET.hostName=name; NET.mode=mode; NET.err=''; NET.status='opening';
+  NET.on=true; NET.host=true; NET.me=0; NET.code=code||newCode(); NET.hostName=name; NET.mode=mode; NET.set=(resumeS&&resumeS.set)||curSetPref(); NET.err=''; NET.status='opening';
   S=resumeS||null; UI.screen=resumeS?'hosting':'lobby'; render();
   NET.handle=NT().host(NET.code,{
     onOpen(){ NET.status='open'; lobbyAnnounce(); render(); },
@@ -2351,7 +2351,7 @@ function onNetData(d){
   if(d.t==='ping'){ if(NET.host&&typeof d.ack==='number') NET.ack=d.ack; return; }
   if(NET.host){
     if(d.t==='hello'){
-      if(!S){ if(TT.on) return; newCampaign([NET.hostName,String(d.name||'Invité').slice(0,20)],NET.mode); S.handoff=null; }
+      if(!S){ if(TT.on) return; newCampaign([NET.hostName,String(d.name||'Invité').slice(0,20)],NET.mode,NET.set); S.handoff=null; }
       else if(d.name) P(1).name=String(d.name).slice(0,20);
       save(); render(); netSend(null); lobbyAnnounce(); return;
     }
@@ -2500,6 +2500,7 @@ function lobbyHTML(){
    <div class="row"><label>Ton nom <input id="nname" value="${esc(myName())}" size="12" maxlength="20"></label></div>
    <div class="netbox"><h3>Jouer</h3>
      <div class="row"><label>Format : <select id="nmode"><option value="sealed">Scellé</option><option value="draft" ${/draft|t4d/.test(NET.mode||'')?'selected':''}>Draft</option></select></label>
+     <label>Cartes : <select id="cset">${['base','test'].map(k=>`<option value="${k}" ${curSetPref()===k?'selected':''}>${SET_LBL[k]}</option>`).join('')}</select></label>
      <label>Joueurs : <select id="nsize">${[2,4,6,8].map(k=>`<option value="${k}" ${(NET.tsize||2)===k?'selected':''}>${k===2?'2 joueurs':'Tournoi à '+k}</option>`).join('')}</select></label></div>
      <div class="row" style="margin-top:6px;flex-wrap:wrap">${(NET.on&&NET.host)||(TT.on&&!TT.solo)?'<span class="muted">Tu as déjà une table ouverte.</span>':'<button class="primary" data-act="nhost">Créer une table</button>'}</div>
      ${hs&&hs.S?`<div class="row" style="margin-top:6px"><button data-act="nresume">Reprendre ma table ${esc(hs.code)} (partie ${hs.S.game})</button></div>`:''}
@@ -2517,6 +2518,7 @@ function hostingHTML(){
   return `<div class="paper" style="margin-top:10px"><h2>Ta table est ouverte</h2>
    ${NET.err?`<div class="note" style="background:#f8d7d2">${esc(NET.err)}</div>`:''}
    <p>Code de la table :</p><div class="bigcode">${esc(NET.code)}</div>
+   <p class="center" style="margin:4px 0">Cartes : <b>${SET_LBL[NET.set||curSetPref()]}</b></p>
    <p class="muted">Donne ce code à ton ami, ou envoie-lui ce lien :</p>
    <div class="row"><input id="nlink" value="${esc(link)}" readonly style="flex:1;font-size:13px"><button class="small" data-act="ncopy">Copier</button></div>
    <p class="center" style="margin-top:14px">${NET.status==='opening'?'Ouverture de la table…':'En attente d’un adversaire…'}</p>
