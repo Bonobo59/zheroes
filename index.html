@@ -306,6 +306,34 @@ body.tuto #app{pointer-events:none}
 @keyframes wshake{0%,60%,100%{transform:translateX(-50%) rotate(0)}65%{transform:translateX(calc(-50% - 4px)) rotate(-2deg)}70%{transform:translateX(calc(-50% + 4px)) rotate(2deg)}75%{transform:translateX(calc(-50% - 3px)) rotate(-1deg)}80%{transform:translateX(calc(-50% + 2px))}}
 #netlost{position:fixed;inset:0;z-index:180;background:rgba(20,15,12,.75);display:flex;align-items:center;justify-content:center;padding:14px}
 #netlost .paper{max-width:380px}
+.lobby2{max-width:1000px;margin:10px auto 0;padding:0 4px}
+#asreplay{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:650;background:var(--ink);color:#fff9ee;padding:8px 10px 8px 16px;border-radius:24px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 14px rgba(0,0,0,.4);font-size:15px;max-width:94vw}
+#asreplay button{background:#fff9ee}
+.lobby2 .lcard,.lobby2 .lb-head{border:2px solid var(--ink);border-radius:14px 12px 15px 11px!important;box-shadow:3px 4px 0 rgba(0,0,0,.45)!important}
+.lobby2 .lcard h3{border-bottom:2px dashed var(--line);padding-bottom:6px}
+.lb-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.lb-logo{width:150px;max-width:34%}
+.lb-title{flex:1;min-width:160px}.lb-title h2{margin:0 0 2px;font-family:'Permanent Marker',inherit;font-size:28px}
+.lb-name input{font-size:17px}
+.lb-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.lb-grid .lb-wide{grid-column:1/-1}
+@media (max-width:720px){.lb-grid{grid-template-columns:1fr}.lb-logo{width:110px}}
+.lcard{padding:10px 12px}.lcard h3{margin:0 0 8px;font-size:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.seg{display:inline-flex;border:2px solid var(--ink);border-radius:20px;overflow:hidden;box-shadow:2px 2px 0 var(--ink);background:#fff9ee}
+.seg button{border:0;border-radius:0;box-shadow:none;padding:6px 14px;background:transparent;font-size:16px}
+.seg button+button{border-left:2px solid var(--ink)}
+.seg button.on{background:var(--ink);color:#fff9ee}
+.lb-help{font-size:14px;margin:6px 0}
+.lb-opts{display:flex;flex-wrap:wrap;gap:8px 14px}.lb-opts label{display:flex;flex-direction:column;font-size:14px;color:var(--muted)}
+.lb-opts select{font-size:16px;margin-top:2px}
+button.big{font-size:19px;padding:7px 18px}
+.ltable{display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px dotted var(--line)}
+.lt-main{flex:1;display:flex;flex-direction:column;min-width:0}.lt-main .muted{font-size:13px}
+.lbadge{font-size:12px;padding:2px 8px;border-radius:12px;border:1.5px solid var(--ink);white-space:nowrap;background:#fff}
+.lbadge.live{background:#d9f2e1}.lbadge.async{background:#e6e0f7}.lbadge.turn{background:var(--red);color:#fff;border-color:var(--red)}
+.lb-code{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;font-size:14px}
+.asrow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;margin:4px 0;background:rgba(255,255,255,.55);border:1.5px solid var(--line)}
+.asrow.myturn{border:2px solid var(--red);background:#fff1ec}
 .netbox{border:2px dashed var(--muted);border-radius:10px;padding:8px 10px;margin:10px 0;background:rgba(255,255,255,.4)}
 .netbox h3{margin-top:0}
 .tablerow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dotted var(--line)}
@@ -1154,7 +1182,7 @@ function chronoTxt(){ if(!S) return '0:00'; const t0=campT0(); const end=(S.phas
 setInterval(()=>{ const el=document.querySelector('[data-chrono]'); if(el&&S) el.textContent='⏱ '+chronoTxt(); },1000);
 function topbar(){
   const ph={build:'Construction',pool:'Pool',dprep:'Préparation',draft:'Draft',prep:'Préparation',place:'Positionnement',reveal:'Révélation',combat:'Combats',coche:'Coche',gameEnd:'Fin de partie',campaignEnd:'Fin de campagne'}[S.phase]||'';
-  return `<div class="topbar"><img class="toplogo" src="logo.webp" alt="Zheroes First Draft"><span>${NET.on?`<span class="onl">${S.tour?'🏆 Table '+S.tour.table+' · ':'🌐 '}${esc(P(OPP()).name)}</span> · `:''}<span class="tchips">${S.set==='test'?`<span class="tchip" title="SET test équilibrage" style="background:#ffe1a8">🧪${MOB()?'':' SET test'}</span>`:''}<span class="tchip">${MOB()?'P':'Partie '}${S.game}/6</span><span class="tchip">${MOB()?'M':'Manche '}${S.manche}/3</span><span class="tchip ph">${ph}</span><span class="tchip clk" data-chrono>⏱ ${chronoTxt()}</span></span></span>
+  return `<div class="topbar"><img class="toplogo" src="logo.webp" alt="Zheroes First Draft"><span>${NET.on?`<span class="onl">${S.tour?'🏆 Table '+S.tour.table+' · ':AS.on?'⏳ ':'🌐 '}${esc(P(OPP()).name)}</span> · `:''}<span class="tchips">${S.set==='test'?`<span class="tchip" title="SET test équilibrage" style="background:#ffe1a8">🧪${MOB()?'':' SET test'}</span>`:''}<span class="tchip">${MOB()?'P':'Partie '}${S.game}/6</span><span class="tchip">${MOB()?'M':'Manche '}${S.manche}/3</span><span class="tchip ph">${ph}</span><span class="tchip clk" data-chrono>⏱ ${chronoTxt()}</span></span></span>
     <span class="row">${MOB()?'<button data-act="rules" title="Règles">📖</button><button data-act="cat" title="Cartes">🃏</button><button data-act="menu" title="Menu">☰</button>':'<button data-act="rules">Règles</button><button data-act="cat">Cartes</button><button data-act="menu">Menu</button>'}</span></div>`;
 }
 function scoreRow(pl){
@@ -1301,12 +1329,16 @@ function netOverlay(){
   let w=document.getElementById('waitb'); const txt=waitingText();
   if(txt){ if(!w){ w=document.createElement('div'); w.id='waitb'; document.body.appendChild(w);} if(w.dataset.t!==txt){ w.dataset.t=txt; w.innerHTML=`<span class="wdot">⏳</span> ${esc(txt)}`; } }
   else if(w) w.remove();
+  let rp=document.getElementById('asreplay'); const rep=AS.on&&!NET.host&&S&&(NET.queue.length>0||(NET.busy&&AS.curSeq>AS.seen));
+  if(rep){ if(!rp){ rp=document.createElement('div'); rp.id='asreplay'; rp.innerHTML='<span>⏪ Ce qui s’est passé pendant ton absence…</span> <button class="small" data-act="asskip">Passer ⏩</button>'; rp.onclick=e=>{ if(e.target.closest('[data-act=asskip]')) asSkip(); }; document.body.appendChild(rp);} }
+  else if(rp) rp.remove();
   let o=document.getElementById('netlost');
-  const lost=(NET.on&&S&&NET.conn&&!NET.alive)||(TT.on&&TT.lost);
+  const lost=(NET.on&&!AS.on&&S&&NET.conn&&!NET.alive)||(TT.on&&TT.lost);
   if(lost){ if(!o){ o=document.createElement('div'); o.id='netlost'; document.body.appendChild(o);} o.innerHTML=`<div class="paper center"><h3>Connexion perdue avec ${NET.host?'ton adversaire':'l’hôte'}</h3><p class="muted">${NET.host?'Ta table reste ouverte : ton adversaire peut revenir avec le même code ('+esc(NET.code)+').':'Tu peux tenter de te reconnecter.'}</p>${NET.host?'':'<button class="primary" data-act="nreconnect">Se reconnecter</button> '}<button data-act="nleave">Quitter la partie</button></div>`; }
   else if(o) o.remove();
 }
 function menuHTML(){
+  if(ONLINE&&asMine().length){ setTimeout(()=>{ if(!LBY.on) lbyStart(); else { asRefreshList(); asBadge(); } },300); }
   const saved=loadSaved();
   return `<div class="paper" style="margin-top:10px"><div class="center"><img class="biglogo" src="logo.webp" alt="Zheroes First Draft"></div>
     <p class="center muted" style="margin-top:0">Autobattler legacy, un jeu de Adrien FENOUILLET et Rémi MATHIEU</p>
@@ -1319,7 +1351,7 @@ function menuHTML(){
     <div class="spacer"></div><div class="row"><label>Ton nom <input id="n1" value="${esc(myName()||'Joueur 1')}" size="10" maxlength="20"></label><label class="p2lbl">Joueur 2 <input id="n2" value="${esc(UI.n2||'Joueur 2')}" size="10" maxlength="20"></label></div>
     <div class="spacer"></div><div class="center"><button class="primary" data-act="new">Lancer la campagne</button></div>
     <div class="spacer"></div>
-${ONLINE?'<div class="center" style="margin-bottom:10px"><button class="primary" data-act="online" style="font-size:19px">🌐 Jouer en ligne</button></div>':''}
+${ONLINE?'<div class="center" style="margin-bottom:10px"><button class="primary" data-act="online" style="font-size:19px">🌐 Jouer en ligne <span id="asbadge" class="lbadge turn" style="display:none"></span></button></div>':''}
     <div class="center"><button class="primary" data-act="tuto" style="background:#f5c542;color:var(--ink)">📖 Tutoriel</button> <button data-act="cat">Voir les cartes</button> <button data-act="stats">📊 Statistiques</button> <button data-act="rules">Résumé des règles</button></div>${ONLINE?'<div class="center" style="margin-top:18px"><img class="iello" src="iello.webp" alt="IELLO"></div>':''}</div>`;
 }
 function draftPage(pack,selId,key,ok){
@@ -1401,7 +1433,7 @@ async function animatePrep(key){
   UI.prepDone=key; UI.prepAnim=null; UI.prepShown={}; if(S&&S.phase==='prep') render();
 }
 function prepHTML(){
-  return `<div class="paper"><div class="center" style="margin-bottom:8px">${isGuest()?'<b>L’hôte lance la campagne…</b>':'<button class="primary" data-act="startgame">Débuter la campagne</button>'}</div><h2>Préparation</h2>
+  return `<div class="paper"><div class="center" style="margin-bottom:8px">${isGuest()&&!AS.on?'<b>L’hôte lance la campagne…</b>':'<button class="primary" data-act="startgame">Débuter la campagne</button>'}</div><h2>Préparation</h2>
    <p style="margin-top:0">Avant la première partie, la 1re, 2e et 3e carte de chaque deck ont reçu +1 ATK, +1 ♥, leur pouvoir I entièrement coché, et l’allégeance LUNE, ETOILE puis SOLEIL. Les decks ont ensuite été mélangés.</p>
    ${S.players.map((p,pl)=>`<h3>${esc(p.name)}</h3><div class="grid4 prep3">${p.prep.map(id=>`<div class="cardwrap">${prepCard(pl,id)}</div>`).join('')}</div>`).join('')}
    </div>`;
@@ -1534,12 +1566,12 @@ function endHTML(){
     <div class="paper center dvpaper">${deckViewHTML(S.players.map((p,i)=>({name:p.name,cs:p.cs,me:i===ME(),trk:p.trk,trkM:p.trkM})),wi>=0?wi:null)}</div>`;
   }
   const lw=last.vp[0]>last.vp[1]?0:last.vp[1]>last.vp[0]?1:-1;
-  return `<div class="scorecard"><div class="sc-head"><div class="sc-kicker">Fin de la partie ${last.game}/6</div><span class="sc-title">${last.winner?esc(last.winner)+' gagne la partie !':'Égalité !'}</span><div class="sc-next">${isGuest()?'<b>L’hôte lance la partie suivante…</b>':`<button class="primary" data-act="nextgame">Lancer la partie ${S.game+1}</button>`}</div></div>
+  return `<div class="scorecard"><div class="sc-head"><div class="sc-kicker">Fin de la partie ${last.game}/6</div><span class="sc-title">${last.winner?esc(last.winner)+' gagne la partie !':'Égalité !'}</span><div class="sc-next">${isGuest()&&!AS.on?'<b>L’hôte lance la partie suivante…</b>':`<button class="primary" data-act="nextgame">Lancer la partie ${S.game+1}</button>`}</div></div>
     <div class="sc-plates">${S.players.map((p,i)=>plateHTML(p,i,last.vp[i],`<b>${p.pc} pts de classement</b> · ${st[i]} ⭐ au total`,lw===i)).join('<div class="sc-vs">VS</div>')}</div>
     ${tbl}
     ${cocheGameHTML(last.game)}
     <p class="muted">Les cartes défaussées sont mélangées pour reformer chaque deck. Les coches sont conservées.</p>
-    ${isGuest()?'<b>L’hôte lance la partie suivante…</b>':`<button class="primary" data-act="nextgame">Lancer la partie ${S.game+1}</button>`}</div>`;
+    ${isGuest()&&!AS.on?'<b>L’hôte lance la partie suivante…</b>':`<button class="primary" data-act="nextgame">Lancer la partie ${S.game+1}</button>`}</div>`;
 }
 
 /* ---------- modal ---------- */
@@ -1593,7 +1625,7 @@ function renderModal(){
      <p><b>Dessins :</b> les cartes ✏️ dessinent quand leur condition est remplie (à la révélation pour ⚡, à la destruction pour 💀). « Complet » = tous les dessins faits.</p>
      <table class="tbl"><tr><th>Parties</th><th>Vainqueur</th><th>Perdant</th><th>Égalité</th></tr><tr><td>1–2</td><td>2</td><td>0</td><td>1</td></tr><tr><td>3–4</td><td>3</td><td>0</td><td>1</td></tr><tr><td>5–6</td><td>4</td><td>0</td><td>2</td></tr></table></div>`;
   } else if(m.type==='confirmmenu'){
-    body=`<div class="paper center"><h3>Revenir au menu ?</h3><p>${NET.on?(NET.host?'Ta table sera fermée. Tu pourras la reprendre depuis le salon.':'Tu quittes la table en ligne.'):'La campagne en cours reste sauvegardée sur cet appareil.'}</p><button data-act="close">Annuler</button> <button class="primary" data-act="gomenu">Menu</button></div>`;
+    body=`<div class="paper center"><h3>Revenir au menu ?</h3><p>${AS.on?'La partie reste enregistrée : tu la retrouveras dans « Mes parties » du lobby.':NET.on?(NET.host?'Ta table sera fermée. Tu pourras la reprendre depuis le salon.':'Tu quittes la table en ligne.'):'La campagne en cours reste sauvegardée sur cet appareil.'}</p><button data-act="close">Annuler</button> <button class="primary" data-act="gomenu">Menu</button></div>`;
   } else if(m.type==='toast'){
     body=`<div class="paper center"><p>${esc(m.text)}</p><button data-act="close">OK</button></div>`;
   }
@@ -2168,6 +2200,7 @@ function fbDB(){
     onDisc(p){ try{ db.ref(p).onDisconnect().remove(); }catch(e){} },
     onDiscSet(p,v){ try{ db.ref(p).onDisconnect().set(v); }catch(e){} },
     once(p){ return db.ref(p).once('value').then(s=>s.val()); },
+    tx(p,fn){ return db.ref(p).transaction(fn).then(r=>({committed:r.committed,value:r.snapshot.val()})); },
     onConnected(cb){ db.ref('.info/connected').on('value',s=>{ if(s.val()) cb(); }); }};
 }
 function fakeDB(){ // tests hors ligne : base partagée entre onglets via localStorage
@@ -2185,7 +2218,8 @@ function fakeDB(){ // tests hors ligne : base partagée entre onglets via localS
     push(p,v){ const k=Date.now().toString(36)+(n++).toString(36).padStart(5,'0')+Math.random().toString(36).slice(2,5); return api.set(p+'/'+k,v); },
     on(p,cb,lim){ const s={p,cb,lim,last:undefined}; subs.push(s); setTimeout(notify,0); return ()=>{ const i=subs.indexOf(s); if(i>=0) subs.splice(i,1); }; },
     onDisc(p){ if(!disc.includes(p)) disc.push(p); }, onDiscSet(p,v){ discSet.push([p,v]); },
-    once(p){ const v=get(read(),p); return Promise.resolve(v==null?null:JSON.parse(JSON.stringify(v))); }, onConnected(cb){ setTimeout(cb,0); }};
+    once(p){ const v=get(read(),p); return Promise.resolve(v==null?null:JSON.parse(JSON.stringify(v))); }, onConnected(cb){ setTimeout(cb,0); },
+    tx(p,fn){ const tr=read(); const c=get(tr,p); const nv=fn(c==null?null:JSON.parse(JSON.stringify(c))); if(nv===undefined) return Promise.resolve({committed:false,value:c==null?null:c}); put(tr,p,nv); return write(tr).then(()=>({committed:true,value:nv})); }};
   return api;
 }
 function lbyFail(e){ const c=(e&&(e.code||e.message))||String(e); LBY.err='Erreur du lobby : '+c; console.warn('lobby',e); lbyRefresh(); }
@@ -2206,6 +2240,8 @@ function lbyStart(){
     D.onConnected(()=>{ D.set('zh/players/'+uid,lbyMe()); D.onDisc('zh/players/'+uid); D.onDisc('zh/invites/'+uid);
       if(LBY.myTable){ D.set('zh/tables/'+LBY.myTable.code,LBY.myTable); D.onDisc('zh/tables/'+LBY.myTable.code); } });
     D.on('zh/players',v=>{ LBY.players=v||{}; lbyRefresh(); });
+    D.on('zh/asopen',v=>{ AS.open=v||{}; lbyRefresh(); });
+    asRefreshList(true);
     D.on('zh/tables',v=>{ NET.tables=Object.values(v||{}).filter(x=>x&&x.code); lbyRefresh(); });
     D.on('zh/chat',v=>{ LBY.chat=Object.keys(v||{}).sort().map(k=>v[k]).filter(Boolean); lbyRefresh(); },40);
     D.on('zh/invites/'+uid,v=>{ LBY.invites=v||{}; lbyInvite(); });
@@ -2214,7 +2250,7 @@ function lbyStart(){
     lbyRefresh();
   }).catch(e=>{ LBY.failed=true; LBY.err='Connexion au lobby impossible ('+((e&&(e.code||e.message))||e)+').'; lbyRefresh(); });
 }
-function lbyTick(){ if(!LBY.uid) return; const me=lbyMe(); const k=me.name+'|'+me.status; if(k!==LBY.lastSt){ LBY.lastSt=k; LBY.db.set('zh/players/'+LBY.uid,me); } lbyInvite(); }
+function lbyTick(){ if(!LBY.uid) return; if(!AS.on) asRefreshList(); const me=lbyMe(); const k=me.name+'|'+me.status; if(k!==LBY.lastSt){ LBY.lastSt=k; LBY.db.set('zh/players/'+LBY.uid,me); } lbyInvite(); }
 function lbyAnnounce(tb){
   if(!LBY.db||!LBY.uid){ LBY.pending=tb; return; }
   const old=LBY.myTable;
@@ -2235,8 +2271,13 @@ function lbyPlayersHTML(canInvite){
   return L.map(([u,p])=>`<div class="tablerow"><span><b>${esc(String(p.name))}</b>${u!==LBY.uid&&p.v!==PROTO?' <span class="muted" style="font-size:12px">(autre version)</span>':''}${u===LBY.uid?' <span class="muted">(toi)</span>':''} <span class="muted" style="font-size:14px">${ST_LBL[p.status]||''}</span></span>${u!==LBY.uid&&canInvite&&(p.status==='lobby'||p.status==='menu')?`<button class="small" data-act="linvite" data-uid="${esc(u)}">Inviter</button>`:''}</div>`).join('')||'<p class="muted">Personne pour l’instant.</p>';
 }
 function lbyTablesHTML(){
-  const tables=(NET.tables||[]).filter(t=>t&&t.code&&!(NET.host&&t.code===NET.code)&&t.hostUid!==LBY.uid).sort((a,b)=>(a.at||0)-(b.at||0));
-  return tables.length?tables.map(t=>`<div class="tablerow"><span><b>${esc(String(t.name||'?').slice(0,20))}</b> <span class="muted">· ${t.mode&&t.mode.startsWith('t4')?'Tournoi '+(t.max||4)+' j. '+({t4s:'scellé',t4d:'draft',t4b:'construit',t4p:'pool'}[t.mode]||'')+' ('+(t.n||1)+'/'+(t.max||4)+')':modeLabel(t.mode)}</span></span>${t.v===PROTO?`<button class="small primary" data-act="njoin" data-code="${esc(t.code)}">Rejoindre</button>`:`<span class="muted" style="font-size:13px;text-align:right">${(t.v||0)<PROTO?'version plus ancienne':'version plus récente : recharge la page'}</span>`}</div>`).join(''):`<p class="muted" style="margin:4px 0">Aucune table ouverte pour l’instant.</p>`;
+  const me=asPid();
+  const live=(NET.tables||[]).filter(t=>t&&t.code&&!(NET.host&&t.code===NET.code)&&t.hostUid!==LBY.uid).sort((a,b)=>(a.at||0)-(b.at||0));
+  const asy=Object.values(AS.open||{}).filter(t=>t&&t.gid&&t.pid!==me&&Date.now()-(t.at||0)<7*864e5).sort((a,b)=>(a.at||0)-(b.at||0));
+  const fmt=t=>t.mode&&String(t.mode).startsWith('t4')?'Tournoi '+(t.max||4)+' j. '+({t4s:'scellé',t4d:'draft',t4b:'construit',t4p:'pool'}[t.mode]||'')+' ('+(t.n||1)+'/'+(t.max||4)+')':modeLabel(t.mode)+' (1/2)';
+  const rows=[...live.map(t=>`<div class="ltable"><span class="lbadge live">● En direct</span><div class="lt-main"><b>${esc(String(t.name||'?').slice(0,20))}</b><span class="muted">${esc(fmt(t))}${t.set==='test'?' · 🧪':''}</span></div>${t.v===PROTO?`<button class="small primary" data-act="njoin" data-code="${esc(t.code)}">Rejoindre</button>`:'<span class="muted" style="font-size:12px">autre version</span>'}</div>`),
+    ...asy.map(t=>`<div class="ltable"><span class="lbadge async">⏳ Tour par tour</span><div class="lt-main"><b>${esc(String(t.name||'?').slice(0,20))}</b><span class="muted">${esc(fmt(t))}${t.set==='test'?' · 🧪':''} · ${asAgo(t.at)}</span></div>${t.v===PROTO?`<button class="small primary" data-act="asjoin" data-gid="${esc(t.gid)}">S’inscrire</button>`:'<span class="muted" style="font-size:12px">autre version</span>'}</div>`)];
+  return rows.length?rows.join(''):'<p class="muted" style="margin:4px 0">Aucune table ouverte pour l’instant : crée la tienne !</p>';
 }
 function lbyChatHTML(){
   const hm=x=>{ const d=new Date(x||0); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
@@ -2263,6 +2304,7 @@ function lbyMineHTML(){
 }
 function lbyRefresh(){
   const set=(id,h)=>{ const el=document.getElementById(id); if(el&&el.dataset.h!==h){ el.dataset.h=h; el.innerHTML=h; if(id==='lb-chat') el.scrollTop=el.scrollHeight; } };
+  set('lb-as',asMineHTML()); { const c=asMyTurnCount(), b=document.getElementById('lb-asn'); if(b){ b.textContent=c?c+' à jouer':''; b.style.display=c?'':'none'; } }
   set('lb-players',lbyPlayersHTML(true)); set('lb-tables',lbyTablesHTML()); set('lb-chat',lbyChatHTML()); set('lb-status',lbyStatusHTML()); set('lb-mine',lbyMineHTML());
   const n=document.getElementById('lb-count'); if(n) n.textContent=Object.keys(LBY.players).length;
 }
@@ -2294,6 +2336,7 @@ function lbyInvite(){
 }
 function lbyToast(msg){ const el=document.createElement('div'); el.className='lbtoast'; el.textContent=msg; document.body.appendChild(el); setTimeout(()=>el.remove(),2800); }
 function lbyCreate(){ // crée une table selon le format et le nombre de joueurs choisis
+  if(UI.lplay==='async'){ asCreate(); return; }
   const f=$('#nmode')?$('#nmode').value:'sealed', n=$('#nsize')?+$('#nsize').value:2; NET.tsize=n;
   if(n>2){ tourHost(f==='draft'?'t4d':'t4s',n); return; }
   NET.mode=f; NET.set=curSetPref(); hostTable(null);
@@ -2310,6 +2353,197 @@ function lsSet(k,v){ try{localStorage.setItem(k,v);}catch(e){} }
 function myName(){ try{return localStorage.getItem('zh_name')||'';}catch(e){return '';} }
 function setMyName(n){ try{localStorage.setItem('zh_name',n);}catch(e){} }
 
+/* ---------- tour par tour : parties enregistrées dans Firebase ----------
+   Chaque coup est déposé dans zh/as/<id>/in. Le premier appareil qui le voit prend le « verrou »,
+   joue le rôle de l'hôte (révélations, combats, PV…), écrit chaque étape dans zh/as/<id>/log puis rend le verrou.
+   Au retour, on rejoue les étapes non vues depuis le journal. */
+const AS={on:false,gid:'',seat:0,meta:null,lock:false,curSeq:0,seen:0,fetched:0,pumping:0,subs:[],inbox:{},done:{},idle:0,tick:null,list:{},open:{},fetching:false,listAt:0};
+const ASP=g=>'zh/as/'+g, ASLOG=40, pad8=n=>String(n).padStart(8,'0');
+function asStore(){ return FBFAKE?sessionStorage:localStorage; }
+function asPid(){ try{ const st=asStore(); let p=st.getItem('zh_pid'); if(!p){ p='p'+Math.random().toString(36).slice(2,12); st.setItem('zh_pid',p); } return p; }catch(e){ return 'p-anon'; } }
+function asK(k){ return 'zh_as_'+asPid()+'_'+k; }
+function asMine(){ try{ return JSON.parse(asStore().getItem(asK('games'))||'[]'); }catch(e){ return []; } }
+function asMineSet(a){ try{ asStore().setItem(asK('games'),JSON.stringify(a.slice(-30))); }catch(e){} }
+function asAddMine(g){ const a=asMine().filter(x=>x!==g); a.push(g); asMineSet(a); }
+function asDelMine(g){ asMineSet(asMine().filter(x=>x!==g)); delete AS.list[g]; try{ asStore().removeItem(asK('S_'+g)); }catch(e){} }
+function asSaveLocal(){ if(!AS.on||!S) return; try{ asStore().setItem(asK('S_'+AS.gid),JSON.stringify({seq:AS.seen,S})); }catch(e){} }
+function asLoadLocal(g){ try{ return JSON.parse(asStore().getItem(asK('S_'+g))||'null'); }catch(e){ return null; } }
+function asFail(e){ const c=(e&&(e.code||e.message))||String(e);
+  lbyToast(/PERMISSION|permission/.test(c)?'La base en ligne refuse l’enregistrement des parties : il faut mettre à jour ses règles d’accès.':'Erreur en ligne : '+c); console.warn('as',e); }
+const asSeatOf=(m,pid)=>{ const p=(m&&m.pids)||{}; return p[0]===pid?0:p[1]===pid?1:-1; };
+const asName=(m,i)=>String(((m&&m.names)||{})[i]||'?');
+function asNeed(st){ // qui doit jouer maintenant ?
+  const n=[false,false]; if(!st) return n;
+  const D=st.draft, N=st.net&&st.net.key===`${st.game}-${st.manche}`?st.net:null;
+  [0,1].forEach(pl=>{
+    switch(st.phase){
+      case 'prep': case 'gameEnd': n[pl]=true; break;
+      case 'draft': n[pl]=!!(D&&!(D.op&&D.op[pl]!=null)); break;
+      case 'build': n[pl]=!(st.build&&st.build[pl]); break;
+      case 'dprep': n[pl]=!(st.dprep&&st.dprep[pl]); break;
+      case 'place': n[pl]=!(N&&N.place&&N.place[pl]); break;
+      case 'coche': n[pl]=!(N&&N.coche&&N.coche[pl]); break;
+      case 'reveal': case 'combat': n[pl]=(st.pending||[]).some(e=>e.pl===pl&&fires(e)&&!(st.armed||[]).includes(e.pl+':'+e.id)); break;
+    } });
+  return n;
+}
+function asConn(){ return {
+  send(d){
+    if(!AS.on||!d) return;
+    if(d.t==='state'){ // l'appareil qui a le verrou enregistre l'étape
+      const seq=d.seq, str=JSON.stringify(d.S), up={};
+      up['log/'+pad8(seq)]={S:str,anim:d.anim?JSON.stringify(d.anim):'',by:AS.seat,at:Date.now()};
+      if(seq>ASLOG) up['log/'+pad8(seq-ASLOG)]=null;
+      up.cur={seq,S:str}; const need=asNeed(d.S);
+      up['meta/need']={0:need[0],1:need[1]}; up['meta/upd']=Date.now(); up['meta/game']=d.S.game||1;
+      up['meta/status']=d.S.phase==='campaignEnd'?'end':'play';
+      AS.seen=AS.fetched=AS.curSeq=Math.max(AS.curSeq,seq); asSaveLocal();
+      LBY.db.update(ASP(AS.gid),up); return; }
+    if(d.t==='ping'||d.t==='bye'||d.t==='hello') return;
+    LBY.db.push(ASP(AS.gid)+'/in',{seat:AS.seat,m:JSON.stringify(d),at:Date.now()}); setTimeout(asKick,50); },
+  close(){} }; }
+function asSeenUpTo(q){ if(q>AS.seen){ AS.seen=q; } asSaveLocal(); }
+async function asOpen(gid){
+  if(!LBY.db||!LBY.uid){ lbyToast('Connexion au lobby…'); return false; }
+  const meta=await LBY.db.once(ASP(gid)+'/meta').catch(e=>{ asFail(e); return null; });
+  if(!meta){ lbyToast('Partie introuvable.'); asDelMine(gid); lbyRefresh(); return false; }
+  const seat=asSeatOf(meta,asPid()); if(seat<0){ lbyToast('Tu n’es pas inscrit à cette partie.'); return false; }
+  asClose(false);
+  Object.assign(AS,{on:true,gid,seat,meta,lock:false,curSeq:0,seen:0,fetched:0,pumping:0,inbox:{},done:{},idle:0});
+  Object.assign(NET,{on:true,host:false,me:seat,code:'',status:'joined',alive:true,lastSeen:Date.now(),queue:[],busy:false,deferred:[],seq:0,err:'',mode:meta.mode});
+  NET.conn=asConn(); NET.handle=null;
+  const loc=asLoadLocal(gid); if(loc&&loc.S){ S=loc.S; AS.seen=AS.fetched=loc.seq||0; } else S=null;
+  UI.screen='game'; UI.modal=null; render();
+  AS.subs.push(LBY.db.on(ASP(gid)+'/cur/seq',q=>{ AS.curSeq=Math.max(AS.curSeq,q||0); if(NET.host){ if((q||0)>NET.seq){ asDropHost(); asFetch(); } return; } asFetch(); }));
+  AS.subs.push(LBY.db.on(ASP(gid)+'/in',v=>{ AS.inbox=v||{}; if(Object.keys(AS.inbox).some(k=>!AS.done[k])) asKick(); }));
+  AS.subs.push(LBY.db.on(ASP(gid)+'/meta',m=>{ if(m){ AS.meta=m; AS.list[gid]=m; } }));
+  clearInterval(AS.tick); AS.tick=setInterval(asTick,1500);
+  return true;
+}
+async function asFetch(){
+  if(!AS.on||AS.fetching||NET.host) return; AS.fetching=true;
+  try{
+    while(AS.on&&!NET.host&&AS.fetched<AS.curSeq){
+      const k=AS.fetched+1;
+      const jump=async()=>{ const c=await LBY.db.once(ASP(AS.gid)+'/cur'); if(!c) return false; NET.queue.push({t:'state',seq:c.seq,S:JSON.parse(c.S),anim:null}); AS.fetched=c.seq; return true; };
+      if(!S||AS.curSeq-AS.fetched>ASLOG-2){ if(!await jump()) break; continue; }
+      const e=await LBY.db.once(ASP(AS.gid)+'/log/'+pad8(k));
+      if(!e){ if(!await jump()) break; continue; }
+      NET.queue.push({t:'state',seq:k,S:JSON.parse(e.S),anim:e.anim?JSON.parse(e.anim):null}); AS.fetched=k;
+    }
+  } catch(e){ console.warn('asFetch',e); } finally{ AS.fetching=false; }
+  if(NET.queue.length) pumpQueue(); else if(!S&&AS.on) render();
+}
+function asSkip(){ if(!NET.queue.length) return; const last=NET.queue[NET.queue.length-1]; NET.queue=[Object.assign({},last,{anim:null})]; }
+function asReadyForLock(){ return AS.on&&!NET.busy&&!NET.queue.length&&!AS.fetching&&AS.fetched>=AS.curSeq&&AS.seen>=AS.curSeq&&!UI.anim; }
+async function asKick(){
+  if(!AS.on) return;
+  if(NET.host){ asProcess(); return; }
+  if(AS.locking||!asReadyForLock()) return;
+  AS.locking=true;
+  try{
+    const me=asPid(), now=Date.now();
+    const r=await LBY.db.tx(ASP(AS.gid)+'/lock',l=>{ if(l&&l.pid!==me&&now-(l.t||0)<15000) return; return {pid:me,t:now}; });
+    if(!r.committed||!AS.on) return;
+    const c=await LBY.db.once(ASP(AS.gid)+'/cur');
+    if(c&&c.seq>AS.seen){ AS.curSeq=c.seq; await LBY.db.tx(ASP(AS.gid)+'/lock',l=>l&&l.pid===me?null:undefined); asFetch(); return; }
+    asHostMode(c?c.seq:0);
+  } catch(e){ console.warn('lock',e); } finally{ AS.locking=false; }
+}
+function asHostMode(seq){
+  NET.host=true; NET.seq=seq||0; AS.lock=true; AS.idle=0;
+  if(!S&&!seq&&AS.meta&&AS.meta.pids&&AS.meta.pids[1]){ // la partie n'a jamais été lancée (l'inscrit a fermé trop tôt)
+    const m=AS.meta; newCampaign([asName(m,0),asName(m,1)],m.mode,m.set); S.handoff=null; UI.screen='game'; save(); netSend(null);
+    LBY.db.update(ASP(AS.gid)+'/meta',{status:'play',upd:Date.now()}); }
+  asProcess(); if(!S) return;
+  if(!UI.anim){ hostTry(); if((S.phase==='reveal'||S.phase==='combat')&&!S.pending.some(fires)) continueAuto();
+    if(S.phase==='combat'&&S.combatDone) autoCoche(); }
+  render();
+}
+function asProcess(){
+  if(!NET.host||!S) return;
+  Object.keys(AS.inbox||{}).sort().forEach(k=>{ if(AS.done[k]) return; AS.done[k]=1; const it=AS.inbox[k]; LBY.db.remove(ASP(AS.gid)+'/in/'+k);
+    try{ intent(+it.seat,JSON.parse(it.m)); }catch(e){ console.warn('intent',e); } });
+}
+function asAutoPending(){ return !!S&&(S.phase==='reveal'||S.phase==='combat')&&!S.pending.some(fires); }
+function asDropHost(){ NET.host=false; AS.lock=false; AS.idle=0; }
+async function asRelease(){
+  if(!AS.lock) return;
+  netSend(null); const me=asPid(); asDropHost(); AS.fetched=AS.seen=AS.curSeq=Math.max(AS.curSeq,NET.seq);
+  try{ await LBY.db.tx(ASP(AS.gid)+'/lock',l=>l&&l.pid===me?null:undefined); }catch(e){}
+  render();
+}
+function asTick(){
+  if(!AS.on) return;
+  const pendingIn=Object.keys(AS.inbox||{}).some(k=>!AS.done[k]);
+  if(AS.lock){
+    LBY.db.set(ASP(AS.gid)+'/lock',{pid:asPid(),t:Date.now()});
+    if(pendingIn) asProcess();
+    const busy=UI.anim||UI.auto||NET.busy||syncTimer||drawBusy()||NET.deferred.length||pendingIn||asAutoPending();
+    if(busy){ AS.idle=0; return; }
+    if(++AS.idle>=2) asRelease();
+    return; }
+  if(AS.fetched<AS.curSeq) asFetch();
+  if(pendingIn||asAutoPending()||(!S&&!AS.curSeq&&AS.meta&&AS.meta.status==='starting')) asKick();
+}
+function asClose(toLobby){
+  if(AS.on&&AS.lock){ try{ netSend(null); LBY.db.remove(ASP(AS.gid)+'/lock'); }catch(e){} }
+  AS.subs.forEach(u=>{ try{u();}catch(e){} }); AS.subs=[]; clearInterval(AS.tick); AS.tick=null;
+  const was=AS.on; Object.assign(AS,{on:false,gid:'',lock:false,inbox:{},done:{}});
+  if(!was) return;
+  Object.assign(NET,{on:false,host:false,me:0,conn:null,code:'',status:'',alive:false,queue:[],busy:false,deferred:[]});
+  if(toLobby){ S=null; UI.screen='lobby'; UI.modal=null; asRefreshList(true); render(); }
+}
+function asCreate(){
+  if(!LBY.db||!LBY.uid){ lbyToast('Connexion au lobby…'); return; }
+  const f=$('#nmode')?$('#nmode').value:'sealed', name=(($('#nname')&&$('#nname').value.trim())||myName()||'Joueur').slice(0,20); setMyName(name);
+  const gid=Date.now().toString(36).slice(-5)+Math.random().toString(36).slice(2,6), me=asPid(), at=Date.now();
+  const meta={gid,mode:f,set:curSetPref(),size:2,pids:{0:me},names:{0:name},status:'open',at,upd:at,v:PROTO};
+  LBY.db.set(ASP(gid)+'/meta',meta).then(()=>{
+    LBY.db.set('zh/asopen/'+gid,{gid,name,mode:f,set:meta.set,n:1,max:2,at,pid:me,v:PROTO});
+    asAddMine(gid); AS.list[gid]=meta; lbyToast('Table créée : la partie démarrera dès qu’un joueur s’inscrit.'); lbyRefresh(); }).catch(asFail);
+}
+async function asJoin(gid){
+  if(!LBY.db||!LBY.uid) return;
+  const me=asPid(), name=(($('#nname')&&$('#nname').value.trim())||myName()||'Joueur').slice(0,20); setMyName(name);
+  let r; try{ r=await LBY.db.tx(ASP(gid)+'/meta',m=>{ if(m==null) return m; if(m.status!=='open') return; const p=m.pids||{}; if(p[0]===me||p[1]) return;
+      m.pids={0:p[0],1:me}; m.names={0:(m.names||{})[0]||'?',1:name}; m.status='starting'; m.upd=Date.now(); return m; }); }catch(e){ asFail(e); return; }
+  if(!r||!r.committed||!r.value||r.value.status!=='starting'){ lbyToast('Cette table n’est plus disponible.'); LBY.db.remove('zh/asopen/'+gid); return; }
+  LBY.db.remove('zh/asopen/'+gid); asAddMine(gid);
+  if(!await asOpen(gid)) return;
+  // le dernier inscrit lance la campagne
+  const lk=await LBY.db.tx(ASP(gid)+'/lock',l=>({pid:me,t:Date.now()}));
+  const m=r.value; newCampaign([asName(m,0),asName(m,1)],m.mode,m.set); S.handoff=null;
+  asHostMode(0); UI.screen='game'; save(); render(); netSend(null);
+  LBY.db.update(ASP(gid)+'/meta',{status:'play',upd:Date.now()});
+}
+async function asCancel(gid){ // retirer une table pas encore commencée
+  const m=AS.list[gid]||await LBY.db.once(ASP(gid)+'/meta');
+  if(m&&m.status==='open'&&asSeatOf(m,asPid())===0){ LBY.db.remove(ASP(gid)); LBY.db.remove('zh/asopen/'+gid); }
+  asDelMine(gid); lbyRefresh();
+}
+async function asRefreshList(force){
+  if(!LBY.db||!LBY.uid) return; if(!force&&Date.now()-AS.listAt<15000) return; AS.listAt=Date.now();
+  const ids=asMine(), me=asPid(); await Promise.all(ids.map(g=>LBY.db.once(ASP(g)+'/meta').then(m=>{ const old=AS.list[g];
+      if(m){ if(old&&old.status==='open'&&m.status!=='open'&&!AS.on) lbyToast(`${asName(m,1)} a rejoint ta table : la partie commence !`); AS.list[g]=m; } else { delete AS.list[g]; asDelMine(g); } }).catch(()=>{})));
+  lbyRefresh(); asBadge();
+}
+function asBadge(){ const b=document.getElementById('asbadge'); if(!b) return; const c=asMyTurnCount(); b.textContent=c?'✋ '+c+' à jouer':''; b.style.display=c?'':'none'; }
+function asMyTurnCount(){ const me=asPid(); return asMine().filter(g=>{ const m=AS.list[g]; if(!m||m.status!=='play') return false; const s=asSeatOf(m,me); return s>=0&&m.need&&m.need[s]; }).length; }
+function asAgo(t){ const d=(Date.now()-(t||0))/60000; return d<1?'à l’instant':d<60?`il y a ${Math.round(d)} min`:d<1440?`il y a ${Math.round(d/60)} h`:`il y a ${Math.round(d/1440)} j`; }
+function asMineHTML(){
+  const me=asPid(), ids=asMine().slice().reverse();
+  if(!ids.length) return '<p class="muted" style="margin:4px 0">Aucune partie en tour par tour pour l’instant.</p>';
+  return ids.map(g=>{ const m=AS.list[g]; if(!m) return `<div class="asrow"><span class="muted">Chargement…</span></div>`;
+    const s=asSeatOf(m,me), opp=s===0?asName(m,1):asName(m,0), fmt=modeLabel(m.mode)+(m.set==='test'?' · 🧪 SET test':'');
+    let st, btn='', cls='';
+    if(m.status==='open'){ st='⏳ En attente d’un adversaire (1/2)'; btn=`<button class="small" data-act="ascancel" data-gid="${esc(g)}">Retirer</button>`; }
+    else if(m.status==='end'){ st='🏁 Campagne terminée'; btn=`<button class="small" data-act="asopen" data-gid="${esc(g)}">Voir</button> <button class="small" data-act="asforget" data-gid="${esc(g)}">✕</button>`; }
+    else { const my=m.need&&m.need[s]; cls=my?'myturn':''; st=my?'<b style="color:var(--red)">✋ À toi de jouer</b>':`En attente de ${esc(opp)}`;
+      btn=`<button class="small ${my?'primary':''}" data-act="asopen" data-gid="${esc(g)}">${my?'Jouer':'Ouvrir'}</button>`; }
+    return `<div class="asrow ${cls}"><div><b>${m.status==='open'?'Ta table':'contre '+esc(opp)}</b> <span class="muted">· ${esc(fmt)}${m.status!=='open'?' · partie '+(m.game||1)+'/6':''}</span><br><span style="font-size:14px">${st}</span> <span class="muted" style="font-size:12px">· ${asAgo(m.upd||m.at)}</span></div><div>${btn}</div></div>`; }).join('');
+}
+
 /* ---------- connection lifecycle ---------- */
 function attachConn(c){
   NET.conn=c; NET.alive=true; NET.lastSeen=Date.now();
@@ -2317,7 +2551,7 @@ function attachConn(c){
   c.onClose(()=>{ if(NET.conn===c){ NET.alive=false; render(); } });
 }
 setInterval(()=>{
-  if(!NET.on||!NET.conn) return;
+  if(!NET.on||!NET.conn||AS.on) return;
   NET.conn.send(NET.host?{t:'ping'}:{t:'ping',ack:NET.gotSeq||0});
   if(NET.host&&S&&(NET.ack||0)<NET.seq&&Date.now()-(NET.lastSend||0)>4000) netSend(null);
   if(NET.alive&&Date.now()-NET.lastSeen>12000){ NET.alive=false; render(); }
@@ -2348,6 +2582,7 @@ function joinTable(code){
   });
 }
 function netLeave(){
+  if(AS.on){ asClose(true); return; }
   try{NET.conn&&NET.conn.send({t:'bye'});}catch(e){}
   try{NET.conn&&NET.conn.close();}catch(e){}
   try{NET.handle&&NET.handle.close();}catch(e){}
@@ -2395,14 +2630,14 @@ async function pumpQueue(){
   try{
     while(NET.queue.length){
       // skip stale plain states if a later one is queued and nothing animates
-      const m=NET.queue.shift();
+      const m=NET.queue.shift(); if(AS.on&&m.seq){ AS.pumping=m.seq; netOverlay(); }
       const post=mergeIncoming(m.S);
       if(!S||!m.anim){ if(NET.queue.length&&!NET.queue[0].anim&&!m.anim) continue; S=post; UI.screen='game'; render(); continue; }
       if(m.anim.k==='fx'){ await animateEffect(clone(S),post,m.anim.evs||[],true); }
       else if(m.anim.k==='fight'){ await guestFight(post); }
       else { S=post; render(); }
     }
-  } finally { NET.busy=false; }
+  } finally { NET.busy=false; if(AS.on){ asSeenUpTo(AS.pumping||0); netOverlay(); } }
 }
 async function guestFight(post){
   UI.anim=true; document.body.classList.add('animating');
@@ -2417,7 +2652,7 @@ async function guestFight(post){
 /* ---------- intents (any player → host) ---------- */
 function netAct(msg){ // local player's action
   if(!NET.on) return;
-  if(NET.host) intent(0,msg); else if(NET.conn) NET.conn.send(msg);
+  if(NET.host) intent(NET.me,msg); else if(NET.conn) NET.conn.send(msg);
 }
 function netInit(){
   if(!S.net||S.net.key!==rkey()) S.net={key:rkey(),place:[null,null],coche:[false,false],ready:{combat:[false,false],coche:[false,false]}};
@@ -2432,9 +2667,11 @@ function intent(pl,m){
     case 'dprep': if(S.phase==='dprep'&&!S.dprep[pl]&&dpValid(P(pl).deck,m.choice)) S.dprep[pl]=m.choice; break;
     case 'draft': { const D=S.draft; if(S.phase==='draft'&&D&&m.round===D.round&&D.packs[pl].includes(m.id)){ D.op=D.op||[null,null]; D.op[pl]=m.id; } break; }
     case 'ready': if(m.key===rkey()&&(m.what==='combat'||m.what==='coche')) S.net.ready[m.what][pl]=true; break;
-    case 'coche': if(S.phase==='coche'&&m.key===rkey()){ if(pl===1&&m.cs) Object.keys(m.cs).forEach(id=>{ if(P(1).cs[id]&&mancheCards(1).includes(+id)) P(1).cs[id]=m.cs[id]; }); S.net.coche[pl]=true; } break;
+    case 'coche': if(S.phase==='coche'&&m.key===rkey()){ if(m.cs&&(pl!==NET.me||AS.on)) Object.keys(m.cs).forEach(id=>{ if(P(1).cs[id]&&mancheCards(1).includes(+id)) P(1).cs[id]=m.cs[id]; }); S.net.coche[pl]=true; } break;
     case 'resolve': clickResolve(pl,m.id); return;
     case 'fight': if(S.phase==='combat'&&!S.combatDone&&!S.pending.some(fires)) fightAnimated(true); return;
+    case 'startgame': if(S.phase==='prep'){ startGame(); render(); } return;
+    case 'nextgame': if(S.phase==='gameEnd'&&S.game<6){ S.game++; startGame(); render(); } return;
   }
   save(); hostTry(); if(!UI.anim) render();
 }
@@ -2506,32 +2743,38 @@ function waitingText(){
   if(S.phase==='reveal'&&S.step>=4&&UI.readySent==='combat-'+k) return 'En attente de l’adversaire…';
   if(S.phase==='combat'&&S.combatDone&&UI.readySent==='coche-'+k) return 'En attente de l’adversaire…';
   if(S.phase==='coche'&&UI.oc&&UI.oc.done) return 'En attente de l’adversaire…';
-  if(isGuest()&&(S.phase==='prep'||S.phase==='gameEnd')) return 'En attente de l’hôte…';
+  if(isGuest()&&!AS.on&&(S.phase==='prep'||S.phase==='gameEnd')) return 'En attente de l’hôte…';
   if((S.phase==='reveal'||S.phase==='combat')&&S.pending.some(e=>fires(e)&&e.pl!==ME())&&!S.pending.some(e=>fires(e)&&e.pl===ME())) return 'L’adversaire active un pouvoir…';
   return '';
 }
 
 /* ---------- screens ---------- */
 function lobbyHTML(){
-  const hs=loadHostSave();
-  return `<div class="paper" style="margin-top:10px"><div class="center"><img class="biglogo" src="logo.webp" alt="Zheroes" style="width:min(260px,70%)"></div>
-   <h2>🌐 Lobby en ligne</h2><div id="lb-status">${lbyStatusHTML()}</div><div id="lb-mine">${lbyMineHTML()}</div>
+  const hs=loadHostSave(), pl=UI.lplay||'live', busy=(NET.on&&NET.host)||(TT.on&&!TT.solo);
+  const seg=(id,v,opts)=>`<div class="seg">${opts.map(([k,l])=>`<button class="${v===k?'on':''}" data-act="lseg" data-k="${id}" data-v="${k}">${l}</button>`).join('')}</div>`;
+  return `<div class="lobby2">
+   <div class="paper lb-head"><img src="logo.webp" alt="Zheroes" class="lb-logo"><div class="lb-title"><h2>Salon en ligne</h2><div id="lb-status">${lbyStatusHTML()}</div></div>
+     <label class="lb-name">Ton nom <input id="nname" value="${esc(myName())}" size="12" maxlength="20"></label></div>
    ${NET.err?`<div class="note" style="background:#f8d7d2">${esc(NET.err)}</div>`:''}
-   <div class="row"><label>Ton nom <input id="nname" value="${esc(myName())}" size="12" maxlength="20"></label></div>
-   <div class="netbox"><h3>Jouer</h3>
-     <div class="row"><label>Format : <select id="nmode"><option value="sealed">Scellé</option><option value="draft" ${/draft|t4d/.test(NET.mode||'')?'selected':''}>Draft</option></select></label>
-     <label>Cartes : <select id="cset">${['base','test'].map(k=>`<option value="${k}" ${curSetPref()===k?'selected':''}>${SET_LBL[k]}</option>`).join('')}</select></label>
-     <label>Joueurs : <select id="nsize">${[2,4,6,8].map(k=>`<option value="${k}" ${(NET.tsize||2)===k?'selected':''}>${k===2?'2 joueurs':'Tournoi à '+k}</option>`).join('')}</select></label></div>
-     <div class="row" style="margin-top:6px;flex-wrap:wrap">${(NET.on&&NET.host)||(TT.on&&!TT.solo)?'<span class="muted">Tu as déjà une table ouverte.</span>':'<button class="primary" data-act="nhost">Créer une table</button>'}</div>
-     ${hs&&hs.S?`<div class="row" style="margin-top:6px"><button data-act="nresume">Reprendre ma table ${esc(hs.code)} (partie ${hs.S.game})</button></div>`:''}
-   </div>
-   <div class="netbox"><h3>Tables ouvertes</h3><div id="lb-tables">${lbyTablesHTML()}</div></div>
-   <div class="netbox"><h3>Joueurs en ligne (<span id="lb-count">${Object.keys(LBY.players).length}</span>)</h3><div id="lb-players" data-inv="1">${lbyPlayersHTML(true)}</div></div>
-   <div class="netbox"><h3>💬 Chat</h3><div id="lb-chat" class="chatbox">${lbyChatHTML()}</div>
+   <div id="lb-mine">${lbyMineHTML()}</div>
+   <div class="lb-grid">
+    <div class="paper lcard"><h3>⏳ Mes parties en tour par tour <span id="lb-asn" class="lbadge turn" style="display:none"></span></h3><div id="lb-as">${asMineHTML()}</div></div>
+    <div class="paper lcard"><h3>✨ Créer une table</h3>
+     ${seg('play',pl,[['live','● En direct'],['async','⏳ Tour par tour']])}
+     <p class="muted lb-help">${pl==='async'?'Chacun joue quand il veut. La partie démarre dès qu’un joueur s’inscrit, et tu retrouves tout ce qui s’est passé à ton retour.':'Vous jouez ensemble en même temps, la table reste ouverte tant que tu es là.'}</p>
+     <div class="lb-opts"><label>Format <select id="nmode"><option value="sealed">Scellé</option><option value="draft" ${/draft|t4d/.test(NET.mode||'')?'selected':''}>Draft</option></select></label>
+     <label>Cartes <select id="cset">${['base','test'].map(k=>`<option value="${k}" ${curSetPref()===k?'selected':''}>${SET_LBL[k]}</option>`).join('')}</select></label>
+     <label>Joueurs <select id="nsize" ${pl==='async'?'disabled':''}>${[2,4,6,8].map(k=>`<option value="${k}" ${(pl==='async'?2:(NET.tsize||2))===k?'selected':''}>${k===2?'2 joueurs':'Tournoi à '+k}</option>`).join('')}</select></label></div>
+     <div class="center" style="margin-top:8px">${busy&&pl==='live'?'<span class="muted">Tu as déjà une table ouverte.</span>':`<button class="primary big" data-act="nhost">${pl==='async'?'Créer la table tour par tour':'Créer la table'}</button>`}</div>
+     ${hs&&hs.S&&pl==='live'?`<div class="center" style="margin-top:6px"><button class="small" data-act="nresume">Reprendre ma table ${esc(hs.code)} (partie ${hs.S.game})</button></div>`:''}
+    </div>
+    <div class="paper lcard lb-wide"><h3>🃏 Tables ouvertes</h3><div id="lb-tables">${lbyTablesHTML()}</div>
+     <div class="lb-code"><span class="muted">Une table en direct avec un code ?</span><input id="ncode" placeholder="ABCD" size="5" maxlength="4" style="text-transform:uppercase" value="${esc(NET.joinCode||'')}"><button class="small" data-act="njoincode">Rejoindre</button></div></div>
+    <div class="paper lcard"><h3>👥 Joueurs en ligne (<span id="lb-count">${Object.keys(LBY.players).length}</span>)</h3><div id="lb-players" data-inv="1">${lbyPlayersHTML(true)}</div></div>
+    <div class="paper lcard"><h3>💬 Chat</h3><div id="lb-chat" class="chatbox">${lbyChatHTML()}</div>
      <div class="row" style="margin-top:6px"><input id="chatin" maxlength="280" placeholder="Ton message…" style="flex:1;min-width:0" autocomplete="off"><button class="primary" data-act="lchat">Envoyer</button></div></div>
-   <div class="netbox"><h3>Rejoindre avec un code</h3>
-     <div class="row"><input id="ncode" placeholder="ABCD" size="6" maxlength="4" style="text-transform:uppercase" value="${esc(NET.joinCode||'')}"><button class="primary" data-act="njoincode">Rejoindre</button></div></div>
-   <div class="center"><button data-act="nback">← Retour au menu</button></div><p class="center muted" style="font-size:12px;margin:6px 0 0">Version ${PROTO}</p></div>`;
+   </div>
+   <div class="center" style="margin:10px 0"><button data-act="nback">← Retour au menu</button></div><p class="center muted" style="font-size:12px;margin:0 0 10px">Version ${PROTO}</p></div>`;
 }
 function hostingHTML(){
   const link=location.href.split('#')[0]+'#join-'+NET.code;
@@ -2545,7 +2788,7 @@ function hostingHTML(){
    <div class="netbox"><h3>Inviter un joueur en ligne</h3><div id="lb-players" data-inv="1">${lbyPlayersHTML(true)}</div></div>
    <div class="center"><button data-act="nleave">Fermer la table</button></div></div>`;
 }
-function joiningHTML(){ return `<div class="paper center" style="margin-top:10px"><h2>Connexion à la table ${esc(NET.code)}…</h2><p class="muted" id="jstep">${esc(NET.joinStep||'Ça prend quelques secondes.')}</p><button data-act="nleave">Annuler</button></div>`; }
+function joiningHTML(){ if(AS.on) return `<div class="paper center" style="margin-top:10px"><h2>Chargement de la partie…</h2><button data-act="nleave">Retour au lobby</button></div>`; return `<div class="paper center" style="margin-top:10px"><h2>Connexion à la table ${esc(NET.code)}…</h2><p class="muted" id="jstep">${esc(NET.joinStep||'Ça prend quelques secondes.')}</p><button data-act="nleave">Annuler</button></div>`; }
 
 
 /* ================= TOURNOI 4 JOUEURS ================= */
@@ -3643,6 +3886,11 @@ document.addEventListener('click',e=>{
     case 'linvite': lbyInvitePlayer(t.dataset.uid); return;
     case 'nback': UI.screen='menu'; NET.err=''; render(); return;
     case 'nhost': { lbyCreate(); return; }
+    case 'lseg': { const nm=$('#nname'); if(nm&&nm.value.trim()) setMyName(nm.value.trim()); if(t.dataset.k==='play') UI.lplay=t.dataset.v; render(); return; }
+    case 'asjoin': asJoin(t.dataset.gid); return;
+    case 'asopen': asOpen(t.dataset.gid); return;
+    case 'ascancel': asCancel(t.dataset.gid); return;
+    case 'asforget': asDelMine(t.dataset.gid); lbyRefresh(); return;
     case 't4start': if(TT.isHost){ if($('#t4lvl')) TT.aiLevel=$('#t4lvl').value; tourStart(); } return;
     case 't4go': if(TT.isHost) tourPlay(TT.T.round); return;
     case 't4prepgo': if(TT.isHost&&TT.T&&TT.T.phase==='prep'){ UI.tpAnim=null; tourStandings(0); } return;
@@ -3679,8 +3927,8 @@ document.addEventListener('click',e=>{
       else {draftEndRound(D); D.turn=0;
         if(D.round>=12){ enterDraftPrep(); } else S.handoff=0;}
       save(); scrollTop0(); render(); return;}
-    case 'startgame': startGame(); render(); return;
-    case 'nextgame': S.game++; startGame(); render(); return;
+    case 'startgame': if(AS.on&&!NET.host){ netAct({t:'startgame'}); return; } startGame(); render(); return;
+    case 'nextgame': if(AS.on&&!NET.host){ netAct({t:'nextgame'}); return; } S.game++; startGame(); render(); return;
     case 'place': {if(NET.on&&UI.placeSent===rkey()) return; const a=placeArr(); if(a.length<4) a.push(+t.dataset.id); render(); return;}
     case 'unplace': {if(NET.on&&UI.placeSent===rkey()) return; placeArr().splice(+t.dataset.k,1); render(); return;}
     case 'preset': if(NET.on&&UI.placeSent===rkey()) return; placeArr().length=0; render(); return;
