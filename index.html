@@ -287,6 +287,8 @@ b[data-vp].gain{animation:gainvp .35s}
 @media (max-width:760px){.home-grid{grid-template-columns:1fr;grid-template-areas:"on" "camp" "res" "tiles"}}
 .home-grid.solo{grid-template-areas:"camp" "res" "tiles"}.home-grid.solo>.home-tiles{grid-template-columns:repeat(4,1fr)}
 @media (max-width:640px){.home-grid.solo>.home-tiles{grid-template-columns:repeat(2,1fr)}}
+.ffbtns{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:6px}
+.ffbtn{background:#c0392b!important;color:#fff!important}
 .home-grid.solo{grid-template-columns:1fr;max-width:560px;margin-left:auto;margin-right:auto}
 .hcard{background:#fffaf0;border:3px solid var(--ink);border-radius:18px 14px 19px 13px;box-shadow:5px 6px 0 rgba(43,35,32,.9);padding:14px 16px 16px;display:flex;flex-direction:column;position:relative}
 .hcard.camp{transform:rotate(-.4deg)}.hcard.online{transform:rotate(.4deg);background:#f1ecfb}
@@ -634,9 +636,13 @@ function newCardState(id){
 
 /* ---------- state ---------- */
 let S=null; var UI={modal:null,screen:'menu'};
-function save(){if(SIM||(UI&&UI.tuto)) return; if(AT.on&&S&&S.tour&&S.ai){ atSoloSave(); return; } if(NET.on){ if(NET.host) netSyncSoon(); return; } if(S&&S.tour) return; try{localStorage.setItem(SAVEKEY,JSON.stringify(S));}catch(e){}}
+function save(){if(SIM||(UI&&UI.tuto)) return; if(S&&S.forfeit!=null&&!NET.on){ clearSave(); return; } if(AT.on&&S&&S.tour&&S.ai){ atSoloSave(); return; } if(NET.on){ if(NET.host) netSyncSoon(); return; } if(S&&S.tour) return; try{localStorage.setItem(SAVEKEY,JSON.stringify(S));}catch(e){}}
 function loadSaved(){try{const t=localStorage.getItem(SAVEKEY);return t?JSON.parse(t):null;}catch(e){return null;}}
 function clearSave(){try{localStorage.removeItem(SAVEKEY);}catch(e){}}
+function doForfeit(pl){ // abandon d'une campagne à 2 : l'autre joueur gagne, pas de statistiques
+  if(!S||S.forfeit!=null) return; S.forfeit=pl; S.phase='campaignEnd'; S.pending=[]; S.coche=null; S.stc=null; S.tEnd=Date.now();
+  UI.oc=null; UI.auto=false; logm(`🏳️ ${P(pl).name} abandonne la campagne.`);
+}
 function P(i){return S.players[i];}
 function cs(pl,id){return P(pl).cs[id];}
 function logm(t){S.log.unshift(t); if(S.log.length>80) S.log.length=80;}
@@ -775,6 +781,7 @@ function finishManche(){
   if(S.manche<3){S.manche++;startManche();} else endGame();
 }
 function endGame(){
+  if(S.forfeit!=null) return;
   stGameEnd();
   S.players.forEach(p=>{ const a=p.trk0||{}, b=p.trk||{}, d={}; Object.keys(b).forEach(k=>d[k]=(b[k]||0)-(a[k]||0)); p.trkHist=p.trkHist||[]; p.trkHist[S.game-1]=d; });
   const [a,b]=S.players; const t=S.game<=2?[2,0,1]:S.game<=4?[3,0,1]:[4,0,2];
@@ -1332,6 +1339,7 @@ function logHTML(){ if(MOB()&&!UI.logOpen) return `<button class="logtog" data-a
 
 function render(){
   if(typeof hideHover==='function') hideHover();
+  if(S&&S.forfeit!=null&&!S.tour&&S.phase!=='campaignEnd') S.phase='campaignEnd';
   if(S&&S.ai&&S.phase==='draft') setTimeout(campDraftKick,60);
   useSet(S&&S.set?S.set:(TT.on&&TT.T&&TT.T.set)?TT.T.set:(S||TT.on)?'base':curSetPref());
   if(UI.tuto) return;
@@ -1614,9 +1622,10 @@ function endHTML(){
      <tr class="tot pcm"><td>🏆 Points de classement</td><td>${a.pc}</td><td>${b.pc}</td><td>${a.pc-b.pc>0?'+':''}${a.pc-b.pc}</td></tr>
      <tr class="tot st"><td>Total ⭐</td><td>${st[0]}</td><td>${st[1]}</td><td>${st[0]-st[1]>0?'+':''}${st[0]-st[1]}</td></tr></table>`;
   if(end){
-    const wi=a.pc>b.pc?0:b.pc>a.pc?1:st[0]>st[1]?0:st[1]>st[0]?1:-1, w=wi>=0?S.players[wi].name:null; const tb=a.pc===b.pc&&w;
+    const ff=S.forfeit!=null?S.forfeit:null;
+    const wi=ff!=null?1-ff:a.pc>b.pc?0:b.pc>a.pc?1:st[0]>st[1]?0:st[1]>st[0]?1:-1, w=wi>=0?S.players[wi].name:null; const tb=ff==null&&a.pc===b.pc&&w;
     return `<div class="scorecard final"><div class="sc-head"><div class="sc-kicker">Fin de la campagne</div><span class="sc-title">${w?'🏆 '+esc(w)+' remporte la campagne !':'Égalité parfaite !'}</span>
-      ${tb?'<p class="muted">Égalité aux points de classement : départagé au nombre total d’étoiles.</p>':''}</div>
+      ${tb?'<p class="muted">Égalité aux points de classement : départagé au nombre total d’étoiles.</p>':''}${ff!=null?`<p class="muted">🏳️ ${esc(S.players[ff].name)} a abandonné la partie.</p>`:''}</div>
       <div class="sc-plates">${S.players.map((p,i)=>plateHTML(p,i,p.pc,`${st[i]} ⭐ gagnées au total`,wi===i,true)).join('<div class="sc-vs">VS</div>')}</div>
       ${tbl}<div class="spacer"></div><button class="primary" data-act="${NET.on?'nhome':'endmenu'}">${NET.on?'Retour au menu principal':'Nouvelle campagne'}</button></div>
     <div class="paper center dvpaper">${deckViewHTML(S.players.map((p,i)=>({name:p.name,cs:p.cs,me:i===ME(),trk:p.trk,trkM:p.trkM})),wi>=0?wi:null)}</div>`;
@@ -1628,6 +1637,30 @@ function endHTML(){
     ${cocheGameHTML(last.game)}
     <p class="muted">Les cartes défaussées sont mélangées pour reformer chaque deck. Les coches sont conservées.</p>
     ${isGuest()&&!AS.on?'<b>L’hôte lance la partie suivante…</b>':`<button class="primary" data-act="nextgame">Lancer la partie ${S.game+1}</button>`}</div>`;
+}
+
+/* ---------- abandon ---------- */
+function canForfeit(){ if(UI.tuto) return false; if(TT.on){ const T=TT.T; return !!(T&&T.phase!=='end'&&T.phase!=='lobby'&&!(T.quit&&T.quit[TT.seat]!=null)); } return !!(S&&S.phase!=='campaignEnd'&&S.forfeit==null); }
+function ffText(){
+  if(TT.on){ const h=tSeats().filter(s=>!isAI(s)&&s!==TT.seat);
+    return h.length>=2?'Une IA difficile prendra ta place jusqu’à la fin du tournoi.':h.length===1?`Le tournoi s’arrête : ${esc(tName(h[0]))} le remporte.`:'Le tournoi s’arrête ici.'; }
+  return `${esc(S.players[1-ME()].name)} remportera la campagne.`;
+}
+function stopAnims(){ UI.anim=false; UI.auto=false; document.body.classList.remove('animating'); }
+async function doAbandon(){
+  UI.modal=null; renderModal();
+  if(TT.on){ const T=TT.T; if(!T) return;
+    if(AT.on){ const tid=AT.tid, seat=AT.seat; stopAnims(); if(S&&S.tour) endTourMatch();
+      try{ await atKick(); }catch(e){}
+      if(AT.lock&&TT.T) tourForfeit(seat); else LBY.db.push(ATP(tid)+'/in',{seat,m:JSON.stringify({t:'forfeit'}),at:Date.now()});
+      atDelMine(tid); setTimeout(()=>{ atClose(true); lbyToast('Tu as abandonné le tournoi.'); },400); return; }
+    if(TT.isHost){ stopAnims(); if(S&&S.tour) endTourMatch(); tourForfeit(TT.seat); UI.screen='tour'; render(); scrollTop0(); return; }
+    try{ TT.base&&TT.base.send({t:'forfeit'}); }catch(e){}
+    stopAnims(); if(S&&S.tour) endTourMatch();
+    setTimeout(()=>{ tourLeave(); netLeave(); S=null; UI.screen='menu'; render(); scrollTop0(); },700); return; }
+  if(!S) return;
+  if(NET.on){ const me=NET.me; netAct({t:'forfeit'}); if(!NET.host&&S.forfeit==null) doForfeit(me); stopAnims(); render(); scrollTop0(); return; }
+  stopAnims(); doForfeit(ME()); clearSave(); render(); scrollTop0();
 }
 
 /* ---------- modal ---------- */
@@ -1681,7 +1714,9 @@ function renderModal(){
      <p><b>Dessins :</b> les cartes ✏️ dessinent quand leur condition est remplie (à la révélation pour ⚡, à la destruction pour 💀). « Complet » = tous les dessins faits.</p>
      <table class="tbl"><tr><th>Parties</th><th>Vainqueur</th><th>Perdant</th><th>Égalité</th></tr><tr><td>1–2</td><td>2</td><td>0</td><td>1</td></tr><tr><td>3–4</td><td>3</td><td>0</td><td>1</td></tr><tr><td>5–6</td><td>4</td><td>0</td><td>2</td></tr></table></div>`;
   } else if(m.type==='confirmmenu'){
-    body=`<div class="paper center"><h3>Revenir au menu ?</h3><p>${AT.on?'Le tournoi reste enregistré : tu le retrouveras dans « Mes parties » du lobby.':AS.on?'La partie reste enregistrée : tu la retrouveras dans « Mes parties » du lobby.':NET.on?(NET.host?'Ta table sera fermée. Tu pourras la reprendre depuis le salon.':'Tu quittes la table en ligne.'):'La campagne en cours reste sauvegardée sur cet appareil.'}</p><button data-act="close">Annuler</button> <button class="primary" data-act="gomenu">Menu</button></div>`;
+    body=`<div class="paper center"><h3>Revenir au menu ?</h3><p>${AT.on?'Le tournoi reste enregistré : tu le retrouveras dans « Mes parties » du lobby.':AS.on?'La partie reste enregistrée : tu la retrouveras dans « Mes parties » du lobby.':NET.on?(NET.host?'Ta table sera fermée. Tu pourras la reprendre depuis le salon.':'Tu quittes la table en ligne.'):'La campagne en cours reste sauvegardée sur cet appareil.'}</p><div class="ffbtns"><button data-act="close">Annuler</button><button class="primary" data-act="gomenu">Retour au menu</button>${canForfeit()?'<button class="ffbtn" data-act="ffask">🏳️ Abandonner la partie</button>':''}</div></div>`;
+  } else if(m.type==='confirmff'){
+    body=`<div class="paper center"><h3>Abandonner la partie ?</h3><p>${ffText()}</p><p class="muted">Cette partie ne sera pas comptée dans les statistiques.</p><div class="ffbtns"><button data-act="close">Annuler</button><button class="ffbtn" data-act="forfeit">🏳️ Abandonner</button></div></div>`;
   } else if(m.type==='toast'){
     body=`<div class="paper center"><p>${esc(m.text)}</p><button data-act="close">OK</button></div>`;
   }
@@ -2951,6 +2986,7 @@ function intent(pl,m){
     case 'fight': if(S.phase==='combat'&&!S.combatDone&&!S.pending.some(fires)) fightAnimated(true); return;
     case 'startgame': if(S.phase==='prep'){ startGame(); render(); } return;
     case 'nextgame': if(S.phase==='gameEnd'&&S.game<6){ S.game++; startGame(); render(); } return;
+    case 'forfeit': if(!S.tour&&(pl===0||pl===1)){ if(S.forfeit==null) doForfeit(pl); NET.deferred=[]; hostSaveOnline(); netSend(null); render(); } return;
   }
   save(); hostTry(); if(!UI.anim) render();
 }
@@ -3144,6 +3180,7 @@ function tourHost(mode,n){
       TT.conns[seat]=c;
       c.onData(d=>tourHostData(seat,d));
       c.onClose(()=>{ if(TT.conns[seat]!==c) return; TT.conns[seat]=null;
+        if(TT.T.quit&&TT.T.quit[seat]!=null) return;
         if(TT.T.phase==='lobby'){ TT.T.names[seat]=null; tourBroadcast(); }
         else { TT.lostSeats=(TT.lostSeats||[]).concat(seat); render(); }
         if(TT.mlink&&TT.mlink.peer===seat){ NET.alive=false; render(); } });
@@ -3168,6 +3205,7 @@ function tourHostData(seat,d){
   if(d.t==='dprep') return tourDP(seat,d.choice);
   if(d.t==='build') return tourBuild(seat,d.ids);
   if(d.t==='matchEnd') return tourMatchEnd(d);
+  if(d.t==='forfeit') return tourForfeit(seat);
 }
 function prep4(deck){
   const cs={}; deck.forEach(id=>cs[id]=newCardState(id));
@@ -3201,7 +3239,7 @@ function tourPick(seat,round,id){
 function tourStandings(nextRound){
   const T=TT.T; T.round=nextRound;
   if(nextRound>=6){ T.phase='end';
-    if(TT.stc){ const r=Object.assign({},TT.stc); delete r.cur; r.pc=T.pc.slice(); r.vpTotal=T.vp.slice(); r.winner=tourRanking()[0];
+    if(TT.stc&&!T.quit){ const r=Object.assign({},TT.stc); delete r.cur; r.pc=T.pc.slice(); r.vpTotal=T.vp.slice(); r.winner=tourRanking()[0];
       r.decks={}; r.final={}; tSeats().forEach(s=>{ r.decks[s]=Object.keys(T.pdata[s].cs).map(Number); r.final[s]=stFinal(T.pdata[s].cs); }); statsSave(r); TT.stc=null; }
     tourBroadcast(); return; }
   if(nextRound===5&&T.n>4){ const rk=tourRanking(); T.pairs[5]=[]; for(let i=0;i<rk.length;i+=2) T.pairs[5].push([rk[i],rk[i+1]]); }
@@ -3245,6 +3283,9 @@ function myPair(r){ return tPairs(r).find(p=>p.includes(TT.seat)); }
 function tourApply(){
   const T=TT.T; if(!T){ render(); return; }
   if(T.phase!=='lobby'&&UI.screen==='lobby') UI.screen='tour';
+  if(S&&S.tour&&T.ffd&&S.tour.seats.some(s=>s!==TT.seat&&T.ffd[S.tour.round+'-'+s])){ // mon adversaire a abandonné ce duel
+    const q=S.tour.seats.find(s=>s!==TT.seat); clearTimeout(TT.leaveTimer); stopAnims();
+    endTourMatch(); render(); toast(`${tName(q)} a abandonné : tu remportes ce duel.`); return; }
   if(AT.on&&S&&S.tour&&S.tour.round!==T.round){ // mon duel précédent est fini : on le quitte proprement avant le suivant
     clearTimeout(TT.leaveTimer);
     TT.leaveTimer=setTimeout(function wait(){ if(UI.anim||UI.auto||NET.busy||NET.queue.length){ TT.leaveTimer=setTimeout(wait,500); return; } endTourMatch(); tourApply(); },2500);
@@ -3257,6 +3298,7 @@ function tourApply(){
   render();
 }
 function startTourMatch(r){
+  if(TT.T&&TT.T.quit&&TT.T.quit[TT.seat]!=null) return; // j'ai abandonné : spectateur
   const pr=myPair(r); if(!pr) return;
   if(AT.on){ if(AS.on) asClose(false); const ti=tPairs(r).indexOf(pr); if(TT.T.done&&TT.T.done[ti]) return;
     const o=pr[0]===TT.seat?pr[1]:pr[0];
@@ -3303,8 +3345,8 @@ function soloAI(){ // l'hôte joue les sièges IA (hors ligne comme en ligne)
   const AIS=tSeats().filter(isAI); if(!AIS.length) return;
   if(T.phase==='draft'&&T.draft){ const r=T.draft.round, run=T.draft;
     if(UI.tdRun===run&&UI.tdRound===r) return; UI.tdRun=run; UI.tdRound=r;
-    const aw=Object.assign({},AIW_BASE,AIPRESET[T.aiLevel||TT.aiLevel||'normal']||{});
     (async()=>{ for(const s of AIS){ const D=TT.T&&TT.T.draft; if(D!==run||D.round!==r) break; if(D.picks[s]!=null) continue;
+        const aw=Object.assign({},AIW_BASE,AIPRESET[tLv(s)]||{});
         const best=await aiDraftAsync('t'+s+'-'+r,D.decks[s],D.packs[s],aw);
         const D2=TT.T&&TT.T.draft; if(D2!==run||D2.round!==r||D2.picks[s]!=null) break; tourPick(s,r,best); }
       if(UI.tdRun===run&&UI.tdRound===r){ UI.tdRun=null; } })();
@@ -3319,7 +3361,7 @@ function soloMatch(r){ // mon duel contre un siège IA, joué sur mon appareil
   Object.assign(NET,{on:false,host:false,me:0,queue:[],busy:false,deferred:[]});
   UI.placeSent=UI.readySent=UI.draftSent=null; UI.oc=null; UI.modal=null;
   const mk=s=>({name:tName(s),cs:clone(TT.T.pdata[s].cs),deck:shuffle(TT.T.pdata[s].deck.slice()),line:[],ko:[],discard:[],vp:0,pc:TT.T.pc[s],trk:clone(TT.T.pdata[s].trk||{}),trkM:clone(TT.T.pdata[s].trkM||{})});
-  S={phase:'setup',mode:'tour',game:r+1,manche:1,players:[mk(a),mk(b)],log:[],pending:[],step:0,turn:0,draft:null,coche:null,results:[],tour:{round:r,seats:[a,b],table:tPairs(r).indexOf(pr)+1},ai:true,aiStyle:'Adaptative',aiLevel:TT.T.aiLevel||TT.aiLevel||'normal',handoff:null};
+  S={phase:'setup',mode:'tour',game:r+1,manche:1,players:[mk(a),mk(b)],log:[],pending:[],step:0,turn:0,draft:null,coche:null,results:[],tour:{round:r,seats:[a,b],table:tPairs(r).indexOf(pr)+1},ai:true,aiStyle:'Adaptative',aiLevel:tLv(b),handoff:null};
   S.stc=stNew('tour','match',[tName(a),tName(b)]); if(S.stc) S.stc.ai='Adaptative';
   startGame(); S.handoff=null; UI.screen='game'; render(); scrollTop0();
 }
@@ -3336,7 +3378,7 @@ function simPlace(pl){
 function simCoche(pl){
   // parties IA contre IA d'un tournoi : même choix de coches que l'IA du jeu (simulation), au niveau du tournoi
   const keepW=AIW, keepPh=S.phase, keepCo=S.coche, sw=pl===0;
-  const T=TT.T; AIW=Object.assign({},AIW_BASE,AIPRESET[(T&&T.aiLevel)||TT.aiLevel||'normal']||{});
+  const T=TT.T; AIW=Object.assign({},AIW_BASE,AIPRESET[(S._lv&&S._lv[pl])||(T&&T.aiLevel)||TT.aiLevel||'normal']||{});
   if(sw) S.players.reverse();
   try{
     S.phase='coche'; S.coche={pl:1,left:4,hist:[]};
@@ -3348,7 +3390,7 @@ function simAIGame(sa,sb,r){
   SIM=true; STMUTE=true;
   try{
     const mk=s=>({name:tName(s),cs:clone(TT.T.pdata[s].cs),deck:shuffle(TT.T.pdata[s].deck.slice()),line:[],ko:[],discard:[],vp:0,pc:TT.T.pc[s],trk:clone(TT.T.pdata[s].trk||{}),trkM:clone(TT.T.pdata[s].trkM||{})});
-    S={phase:'setup',mode:'tour',game:r+1,manche:1,players:[mk(sa),mk(sb)],log:[],pending:[],step:0,turn:0,draft:null,coche:null,results:[]};
+    S={phase:'setup',mode:'tour',game:r+1,manche:1,players:[mk(sa),mk(sb)],log:[],pending:[],step:0,turn:0,draft:null,coche:null,results:[],_lv:[tLv(sa),tLv(sb)]};
     startGame();
     const resolveAll=()=>{ let n=0; while(S.pending.length&&n++<40){ const e=S.pending.shift(); try{ resolveEffect(e); }catch(err){} } };
     let guard=0;
@@ -3368,18 +3410,34 @@ function simAIGame(sa,sb,r){
   } finally { S=keep; SIM=pSIM; STMUTE=pMUTE; FXLOG=fl; FXEV=fe; FXSRC=fs; }
 }
 /* ---------- screens ---------- */
-function tourRanking(){ const T=TT.T; return tSeats().sort((x,y)=>(T.pc[y]-T.pc[x])||(T.vp[y]-T.vp[x])); }
+function tourRanking(){ const T=TT.T; const q=s=>T.ffEnd&&T.quit&&T.quit[s]!=null?1:0, w=s=>T.winner===s?1:0;
+  return tSeats().sort((x,y)=>(w(y)-w(x))||(q(x)-q(y))||(T.pc[y]-T.pc[x])||(T.vp[y]-T.vp[x])); }
+const tLv=s=>{ const T=TT.T; return (T&&T.aiLv&&T.aiLv[s])||(T&&T.aiLevel)||TT.aiLevel||'normal'; };
+function tourForfeit(seat){ // un humain abandonne le tournoi
+  const T=TT.T; if(!T||T.phase==='end'||T.phase==='lobby') return;
+  T.quit=T.quit||{}; if(T.quit[seat]!=null) return; T.quit[seat]=T.round||0;
+  T.ai[seat]=true; T.aiLv=T.aiLv||{}; T.aiLv[seat]='difficile'; TT.stc=null; UI.tdRun=null;
+  const humans=tSeats().filter(s=>!T.ai[s]);
+  if(humans.length<=1){ clearTimeout(TT.startTimer); T.phase='end'; T.ffEnd=true; T.winner=humans.length?humans[0]:null; tourBroadcast(); return; }
+  if(T.phase==='play'){ const ti=tPairs(T.round).findIndex(p=>p.includes(seat));
+    if(ti>=0&&!T.done[ti]){ const pr=tPairs(T.round)[ti], o=pr[0]===seat?pr[1]:pr[0], g=T.round+1;
+      T.pc[o]+=g<=2?2:g<=4?3:4; T.wins[o]++; T.results.push({round:T.round,table:ti+1,seats:pr,vp:[0,0],ff:seat});
+      T.ffd=T.ffd||{}; T.ffd[T.round+'-'+seat]=1; T.done[ti]=true;
+      if(T.done.every(Boolean)){ tourStandings(T.round+1); return; } } }
+  tourBroadcast();
+}
 function tourTable(){
   const T=TT.T;
   return `<table class="stbl"><tr><th>#</th><th>Joueur</th><th>Pts classement</th><th>PV</th><th>Victoires</th></tr>
-   ${tourRanking().map((s,i)=>`<tr class="${s===TT.seat?'me':''}"><td>${['🥇','🥈','🥉'][i]||i+1}</td><td>${esc(tName(s))}${s===TT.seat?' (toi)':''}</td><td><b>${T.pc[s]}</b></td><td>${T.vp[s]}</td><td>${T.wins[s]}</td></tr>`).join('')}</table>`;
+   ${tourRanking().map((s,i)=>`<tr class="${s===TT.seat?'me':''}"><td>${['🥇','🥈','🥉'][i]||i+1}</td><td>${esc(tName(s))}${s===TT.seat?' (toi)':''}${T.quit&&T.quit[s]!=null?' <span class="muted">🏳️ abandon'+(T.ffEnd?'':' · joué par une IA')+'</span>':''}</td><td><b>${T.pc[s]}</b></td><td>${T.vp[s]}</td><td>${T.wins[s]}</td></tr>`).join('')}</table>`;
 }
 function duelsHTML(r){ const P=tPairs(r); if(!P) return '<p class="muted">Duels décidés par le classement (1er contre 2e, 3e contre 4e…).</p>'; return P.map((p,i)=>`<div class="duel ${p.includes(TT.seat)?'mine':''}"><span class="muted">Table ${i+1}</span><b>${esc(tName(p[0]))}</b> <span class="vs">contre</span> <b>${esc(tName(p[1]))}</b></div>`).join(''); }
 function tourHTML(){
   const T=TT.T;
   if(TT.isHost&&!T) return hostingHTML();
   if(!T) return joiningHTML();
-  const lost=(TT.lostSeats||[]).length&&T.phase!=='lobby'?`<div class="note" style="background:#f8d7d2">Joueur déconnecté : ${TT.lostSeats.map(s=>esc(tName(s))).join(', ')}. Le tournoi ne peut pas continuer sans lui.</div>`:'';
+  const spect=T.quit&&T.quit[TT.seat]!=null&&T.phase!=='end'?'<div class="note">🏳️ Tu as abandonné : ton siège est joué par une IA difficile. Garde cette page ouverte, ton appareil héberge le tournoi.</div>':'';
+  const lost=spect+((TT.lostSeats||[]).length&&T.phase!=='lobby'?`<div class="note" style="background:#f8d7d2">Joueur déconnecté : ${TT.lostSeats.map(s=>esc(tName(s))).join(', ')}. Le tournoi ne peut pas continuer sans lui.</div>`:'');
   if(T.phase==='lobby'){
     const link=location.href.split('#')[0]+'#join-'+NET.code; const n=T.names.filter(Boolean).length;
     const N=T.n||4;
@@ -3418,7 +3476,7 @@ function tourHTML(){
   if(T.phase==='end'){
     const r=tourRanking(); const w=r[0];
     const dk=tSeats().filter(s=>T.pdata[s]&&T.pdata[s].cs);
-    return `<div class="scorecard final"><div class="sc-head"><div class="sc-kicker">Fin du tournoi</div><span class="sc-title">🏆 ${esc(tName(w))} remporte le tournoi !</span></div>${tourTable()}
+    return `<div class="scorecard final"><div class="sc-head"><div class="sc-kicker">Fin du tournoi</div><span class="sc-title">🏆 ${esc(tName(w))} remporte le tournoi !</span>${T.ffEnd?`<p class="muted">🏳️ ${Object.keys(T.quit||{}).map(s=>esc(tName(+s))).join(', ')} a abandonné.</p>`:''}</div>${tourTable()}
       <div class="spacer"></div><button class="primary" data-act="nhome">Retour au menu principal</button></div>
       <div class="paper center dvpaper">${deckViewHTML(dk.map(s=>({name:tName(s),cs:T.pdata[s].cs,me:s===TT.seat,trk:T.pdata[s].trk,trkM:T.pdata[s].trkM})),dk.indexOf(w)>=0?dk.indexOf(w):null)}</div>`;
   }
@@ -4235,6 +4293,8 @@ document.addEventListener('click',e=>{
     case 'zoom': openModal({type:'zoom',id:+t.dataset.id,back:UI.modal&&UI.modal.type==='cat'?UI.modal:null}); return;
     case 'zoompl': openModal({type:'zoom',id:+t.dataset.id,pl:NET.on?NET.me:S.turn}); return;
     case 'menu': openModal({type:'confirmmenu'}); return;
+    case 'ffask': openModal({type:'confirmff'}); return;
+    case 'forfeit': doAbandon(); return;
     case 'gomenu': UI.modal=null; if(AT.on){ atClose(true); return; } if(TT.on){ tourLeave(); netLeave(); return; } if(NET.on){ netLeave(); return; } S=null; render(); return;
     case 'endmenu': clearSave(); S=null; UI.dvSel=null; UI.dvPage=0; render(); return;
     case 'dvsel': UI.dvSel=+t.dataset.i; UI.dvPage=0; render(); return;
