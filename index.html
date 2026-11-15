@@ -204,7 +204,7 @@ body.mob .tchip{padding:1px 5px;font-size:12.5px;border-width:1.5px;border-radiu
 .zc .badge{display:inline-flex;align-items:center;gap:1px}
 .zone{position:absolute;z-index:3;border-radius:6px;pointer-events:none}
 .spark{position:fixed;left:0;top:0;border-radius:50%;z-index:620;pointer-events:none;margin:-3px 0 0 -3px}
-.spark.star{border-radius:0;line-height:1;margin:-8px 0 0 -6px;text-shadow:0 0 4px rgba(255,140,0,.8),0 0 1px #6b2a00;font-weight:bold}
+.spark.star{border-radius:0;line-height:1;margin:-8px 0 0 -6px;text-shadow:0 0 4px rgba(255,200,0,.8),0 0 1px #7a5a00;font-weight:bold}
 .zone.will{border:3px dashed #f5c542;box-shadow:0 0 0 2px rgba(0,0,0,.25),inset 0 0 10px rgba(245,197,66,.6)}
 .zone.did{border:3px solid #2f8f4e;box-shadow:0 0 0 2px #fff,0 0 10px 3px rgba(47,143,78,.7)}
 .pendwrap.nofire{animation:none;box-shadow:0 0 0 3px #999}
@@ -1358,7 +1358,7 @@ function render(){
     case 'coche': h+=cocheHTML(); break;
     case 'gameEnd': case 'campaignEnd': h+=endHTML(); break;
   }
-  app.innerHTML=h; renderModal(); netOverlay(); drawWatch(); if(LBY.on) lbyInvite(); if(S.ai) scheduleAI(); autoResolveSoon();
+  app.innerHTML=h; renderModal(); netOverlay(); drawWatch(); if(LBY.on) lbyInvite(); if(S.ai) scheduleAI(); autoResolveSoon(); sparkSoon();
 }
 function netOverlay(){
   let w=document.getElementById('waitb'); const txt=waitingText();
@@ -3001,28 +3001,35 @@ const isArmed=e=>(S.armed||[]).includes(e.pl+':'+e.id);
 // étincelles autour des boîtes de pouvoir qui vont se déclencher
 function sparkZones(){
   const zs=[...document.querySelectorAll('.pendwrap:not(.nofire):not(.armed) .zone.will')]; if(!zs.length) return;
-  const cols=['#ffb000','#ff7a00','#ff4d00','#ffd000','#e63946'];
-  zs.forEach(z=>{ const r=z.getBoundingClientRect(); if(!r.width) return; const per=2*(r.width+r.height), N=Math.max(22,Math.min(48,Math.round(per/9)));
+  const cols=['#ffd000','#ffc400','#ffe04a','#f5c518'];
+  zs.forEach(z=>{ const r=z.getBoundingClientRect(); if(!r.width) return; const per=2*(r.width+r.height), N=Math.max(18,Math.min(36,Math.round(per/11)));
     for(let k=0;k<N;k++){ let t=Math.random()*per, x, y, nx, ny;
       if(t<r.width){ x=r.left+t; y=r.top; nx=0; ny=-1; } else if((t-=r.width)<r.height){ x=r.right; y=r.top+t; nx=1; ny=0; }
       else if((t-=r.height)<r.width){ x=r.right-t; y=r.bottom; nx=0; ny=1; } else { t-=r.width; x=r.left; y=r.bottom-t; nx=-1; ny=0; }
-      const a=Math.atan2(ny,nx)+(Math.random()-.5)*1.6, d=22+Math.random()*46, sz=4+Math.random()*6;
+      const a=Math.atan2(ny,nx)+(Math.random()-.5)*1.6, d=14+Math.random()*28, sz=3+Math.random()*4;
       const e=document.createElement('div'); e.className='spark'; e.style.width=e.style.height=sz+'px'; const c=cols[k%cols.length];
-      if(k%4===0){ e.className='spark star'; e.textContent='✦'; e.style.color=c; e.style.fontSize=(sz*2.6)+'px'; e.style.width=e.style.height='auto'; } else { e.style.background=c; e.style.boxShadow=`0 0 5px 1px ${c}`; } document.body.appendChild(e);
+      if(k%4===0){ e.className='spark star'; e.textContent='✦'; e.style.color=c; e.style.fontSize=(sz*2.3)+'px'; e.style.width=e.style.height='auto'; } else { e.style.background=c; e.style.boxShadow=`0 0 5px 1px ${c}`; } document.body.appendChild(e);
       e.animate([{transform:`translate(${x}px,${y}px) scale(1)`,opacity:1},{transform:`translate(${x+Math.cos(a)*d}px,${y+Math.sin(a)*d}px) scale(.2)`,opacity:0}],
-        {duration:(650+Math.random()*450)*(typeof SPD==='number'?SPD:1),delay:Math.random()*160,easing:'cubic-bezier(.15,.7,.4,1)',fill:'backwards'}).finished.then(()=>e.remove()); } });
+        {duration:(420+Math.random()*280)*(typeof SPD==='number'?SPD:1),delay:Math.random()*160,easing:'cubic-bezier(.15,.7,.4,1)',fill:'backwards'}).finished.then(()=>e.remove()); } });
+}
+function pendSig(){ return S&&S.pending&&(S.phase==='reveal'||S.phase==='combat')?S.pending.filter(e=>fires(e)&&!isArmed(e)).map(e=>e.pl+':'+e.id).join(','):''; }
+function sparkSoon(){ // pour tout le monde (aussi l'invité en ligne et le rattrapage) : une fois la carte arrivée à sa place
+  const sig=pendSig(); if(!sig){ UI.sparkSig=''; return; } if(UI.sparkSig===sig) return;
+  if(UI.anim||UI.deathBusy||drawBusy()){ UI.spOk=0; clearTimeout(UI.spT); UI.spT=setTimeout(sparkSoon,150); return; }
+  if(!UI.spOk){ UI.spOk=1; clearTimeout(UI.spT); UI.spT=setTimeout(sparkSoon,250); return; } // on attend que les dessins soient vraiment finis
+  UI.spOk=0; UI.sparkSig=sig; [30,330,630].forEach(t=>setTimeout(sparkZones,t));
 }
 function autoResolveSoon(){
   if(UI.arT||!S||UI.tuto||isGuest()||(NET.on&&!NET.host)) return;
   if(!(S.phase==='reveal'||S.phase==='combat')||!S.pending||!S.pending.some(e=>fires(e)&&!isArmed(e))) return;
-  setTimeout(sparkZones,40); setTimeout(sparkZones,420); setTimeout(sparkZones,800);
+  if(UI.anim||UI.deathBusy||drawBusy()){ if(!UI.arW) UI.arW=setTimeout(()=>{ UI.arW=null; autoResolveSoon(); },150); return; }
   UI.arT=setTimeout(()=>{ UI.arT=null;
     if(!S||UI.tuto||isGuest()||(NET.on&&!NET.host)||!(S.phase==='reveal'||S.phase==='combat')) return;
     if(UI.anim||UI.auto||drawBusy()){ autoResolveSoon(); return; }
     const G=S.pending.filter(e=>fires(e)&&!isArmed(e)); if(!G.length) return;
     [...new Set(G.map(e=>e.pl))].forEach(pl=>{ const e=G.find(x=>x.pl===pl); if(e&&!UI.anim) clickResolve(pl,e.id); });
     if(S&&S.pending&&S.pending.some(e=>fires(e)&&!isArmed(e))) autoResolveSoon();
-  },1100*(typeof SPD==='number'?SPD:1));
+  },1000*(typeof SPD==='number'?SPD:1));
 }
 function doResolve(i){
   const pre=clone(S); const e=S.pending.splice(i,1)[0]; if(!e){render();return;}
