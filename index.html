@@ -280,7 +280,7 @@ b[data-vp].gain{animation:gainvp .35s}
 .hresume{display:flex;align-items:center;gap:14px;margin:14px auto 4px;padding:10px 22px 10px 14px;background:#fff3c4;border:3px solid var(--ink);border-radius:16px 13px 17px 12px;box-shadow:4px 5px 0 var(--ink);text-align:left;font-size:18px;max-width:520px;width:100%}
 .hresume small{font-size:14px;color:var(--muted)}
 .hr-ico{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:var(--red);color:#fff;font-size:20px;flex:none}
-.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start}
 @media (max-width:760px){.home-grid{grid-template-columns:1fr}}
 .home-grid.solo{grid-template-columns:1fr;max-width:560px;margin-left:auto;margin-right:auto}
 .hcard{background:#fffaf0;border:3px solid var(--ink);border-radius:18px 14px 19px 13px;box-shadow:5px 6px 0 rgba(43,35,32,.9);padding:14px 16px 16px;display:flex;flex-direction:column;position:relative}
@@ -1393,12 +1393,11 @@ function menuHTML(){
         <input id="n2" type="hidden" value="${esc(UI.n2||'Joueur 2')}">
       </div>
       <button class="primary hbig" data-act="new">Lancer la campagne</button></div>
-    ${ONLINE?`<div class="hcard online"><div class="hc-head"><span class="hc-ico">🌐</span><div><h2>Jouer en ligne</h2><p>Contre tes amis, en direct ou en tour par tour : chacun joue quand il veut.</p></div></div>
-      <ul class="hlist"><li>⚡ Tables en direct à 2, ou tournois jusqu’à 8</li><li>⏳ Parties et tournois en tour par tour</li><li>🤖 Places libres complétées par des IA</li></ul>
+    ${ONLINE?`<div class="hcard online"><div class="hc-head"><span class="hc-ico">🌐</span><div><h2>Jouer en ligne</h2></div></div>
       <button class="primary hbig" data-act="online">Entrer dans le salon <span id="asbadge" class="lbadge turn" style="display:none"></span></button></div>`:''}
    </div>
    <div class="home-tiles">
-     <button class="htile tuto" data-act="tuto"><span>📖</span>Tutoriel</button>
+     <button class="htile" data-act="tuto"><span>📖</span>Tutoriel</button>
      <button class="htile" data-act="cat"><span>🃏</span>Voir les cartes</button>
      <button class="htile" data-act="stats"><span>📊</span>Statistiques</button>
      <button class="htile" data-act="rules"><span>📜</span>Résumé des règles</button>
