@@ -1339,7 +1339,7 @@ function netOverlay(){
   else if(o) o.remove();
 }
 function menuHTML(){
-  if(ONLINE&&asMine().length){ setTimeout(()=>{ if(!LBY.on) lbyStart(); else { asRefreshList(); asBadge(); } },300); }
+  if(ONLINE&&(asMine().length||atMine().length)){ setTimeout(()=>{ if(!LBY.on) lbyStart(); else { asRefreshList(); asBadge(); } },300); }
   const saved=loadSaved();
   return `<div class="paper" style="margin-top:10px"><div class="center"><img class="biglogo" src="logo.webp" alt="Zheroes First Draft"></div>
     <p class="center muted" style="margin-top:0">Autobattler legacy, un jeu de Adrien FENOUILLET et Rémi MATHIEU</p>
@@ -2252,7 +2252,7 @@ function lbyStart(){
     lbyRefresh();
   }).catch(e=>{ LBY.failed=true; LBY.err='Connexion au lobby impossible ('+((e&&(e.code||e.message))||e)+').'; lbyRefresh(); });
 }
-function lbyTick(){ if(!LBY.uid) return; if(!AS.on) asRefreshList(); const me=lbyMe(); const k=me.name+'|'+me.status; if(k!==LBY.lastSt){ LBY.lastSt=k; LBY.db.set('zh/players/'+LBY.uid,me); } lbyInvite(); }
+function lbyTick(){ if(!LBY.uid) return; asRefreshList(); const me=lbyMe(); const k=me.name+'|'+me.status; if(k!==LBY.lastSt){ LBY.lastSt=k; LBY.db.set('zh/players/'+LBY.uid,me); } lbyInvite(); }
 function lbyAnnounce(tb){
   if(!LBY.db||!LBY.uid){ LBY.pending=tb; return; }
   const old=LBY.myTable;
@@ -2531,9 +2531,40 @@ async function asRefreshList(force){
       if(m){ if(old&&old.status==='open'&&m.status!=='open'&&!AT.on) lbyToast('Ton tournoi commence !'); AT.list[t]=m; } else atDelMine(t); }).catch(()=>{})));
   const ids=asMine(), me=asPid(); await Promise.all(ids.map(g=>LBY.db.once(ASP(g)+'/meta').then(m=>{ const old=AS.list[g];
       if(m){ if(old&&old.status==='open'&&m.status!=='open'&&!AS.on) lbyToast(`${asName(m,1)} a rejoint ta table : la partie commence !`); AS.list[g]=m; } else { delete AS.list[g]; asDelMine(g); } }).catch(()=>{})));
-  lbyRefresh(); asBadge();
+  lbyRefresh(); asBadge(); notifCheck();
 }
 function asBadge(){ const b=document.getElementById('asbadge'); if(!b) return; const c=asMyTurnCount(); b.textContent=c?'✋ '+c+' à jouer':''; b.style.display=c?'':'none'; }
+/* ---- notifications « À toi de jouer » (tant que le jeu est ouvert, même en arrière-plan) ---- */
+const NOTIF={prev:{},ready:false};
+function notifOn(){ try{ return 'Notification' in window&&Notification.permission==='granted'&&lsGet('zh_notif')!=='off'; }catch(e){ return false; } }
+function notifState(){ if(!('Notification' in window)) return 'none'; if(Notification.permission==='denied') return 'denied'; return notifOn()?'on':'off'; }
+async function notifEnable(){
+  if(!('Notification' in window)){ lbyToast('Ce navigateur ne gère pas les notifications.'); return; }
+  let p=Notification.permission; if(p!=='granted') p=await Notification.requestPermission();
+  if(p==='granted'){ lsSet('zh_notif','on'); lbyToast('🔔 Notifications activées : tu seras prévenu quand c’est ton tour (le jeu doit rester ouvert).'); notifShow('Zheroes','Les notifications fonctionnent 👍',{k:'',id:''}); }
+  else lbyToast('Notifications refusées : tu peux les autoriser dans les réglages du navigateur.');
+  render(); }
+function notifOff(){ lsSet('zh_notif','off'); render(); }
+async function notifShow(title,body,data){
+  if(!notifOn()) return;
+  const opt={body,icon:'icon-192.png',badge:'icon-192.png',tag:'zh-'+(data.k||'')+(data.id||''),renotify:true,data};
+  try{ const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration(); if(reg){ await reg.showNotification(title,opt); return; } }catch(e){}
+  try{ const n=new Notification(title,opt); n.onclick=()=>{ window.focus(); notifOpen(data); n.close(); }; }catch(e){}
+}
+function notifOpen(d){ if(!d||!d.id) return; if(d.k==='t'){ if(!(AT.on&&AT.tid===d.id)) atOpen(d.id); } else if(!(AS.on&&AS.gid===d.id)) asOpen(d.id); }
+try{ navigator.serviceWorker&&navigator.serviceWorker.addEventListener('message',e=>{ if(e.data&&e.data.zhOpen) notifOpen(e.data.zhOpen); }); }catch(e){}
+function notifCheck(){ // appelé après chaque mise à jour de la liste de mes parties
+  const me=asPid(), cur=[];
+  asMine().forEach(g=>{ const m=AS.list[g]; if(!m) return; const s=asSeatOf(m,me); const my=m.status==='play'&&s>=0&&!!(m.need&&m.need[s]);
+    cur.push(['g',g,my,()=>`contre ${s===0?asName(m,1):asName(m,0)}`]); });
+  atMine().forEach(t=>{ const m=AT.list[t]; if(!m) return; const s=atSeatOf(m,me); const my=(m.status==='play'&&s>=0&&!!(m.need&&m.need[s]));
+    cur.push(['t',t,my,()=>`tournoi à ${m.n}`]); });
+  cur.forEach(([k,id,my,lbl])=>{ const key=k+id, was=NOTIF.prev[key];
+    if(NOTIF.ready&&my&&!was){ const here=(k==='g'&&AS.on&&AS.gid===id)||(k==='t'&&AT.on&&AT.tid===id);
+      if(!(here&&!document.hidden)) notifShow('✋ À toi de jouer !',`Zheroes · ${lbl()}`,{k,id}); }
+    NOTIF.prev[key]=my; });
+  NOTIF.ready=true;
+}
 function asMyTurnCount(){ const me=asPid(); return asMine().filter(g=>{ const m=AS.list[g]; if(!m||m.status!=='play') return false; const s=asSeatOf(m,me); return s>=0&&m.need&&m.need[s]; }).length
   + atMine().filter(t=>{ const m=AT.list[t]; if(!m||m.status!=='play') return false; const s=atSeatOf(m,me); return s>=0&&m.need&&m.need[s]; }).length; }
 function asAgo(t){ const d=(Date.now()-(t||0))/60000; return d<1?'à l’instant':d<60?`il y a ${Math.round(d)} min`:d<1440?`il y a ${Math.round(d/60)} h`:`il y a ${Math.round(d/1440)} j`; }
@@ -2967,7 +2998,7 @@ function lobbyHTML(){
      <div class="center" style="margin-top:8px">${busy&&pl==='live'?'<span class="muted">Tu as déjà une table ouverte.</span>':`<button class="primary big" data-act="nhost">${pl==='async'?'Créer la table tour par tour':'Créer la table'}</button>`}</div>
      ${hs&&hs.S&&pl==='live'?`<div class="center" style="margin-top:6px"><button class="small" data-act="nresume">Reprendre ma table ${esc(hs.code)} (partie ${hs.S.game})</button></div>`:''}
     </div>
-    <div class="paper lcard lb-wide"><h3>⏳ Mes parties en tour par tour <span id="lb-asn" class="lbadge turn" style="display:none"></span></h3><div id="lb-as">${asMineHTML()}</div></div>
+    <div class="paper lcard lb-wide"><h3>⏳ Mes parties en tour par tour <span id="lb-asn" class="lbadge turn" style="display:none"></span><span style="flex:1"></span>${notifState()==='on'?'<button class="small" data-act="notifoff">🔔 Notifications activées</button>':notifState()==='denied'?'<span class="muted" style="font-size:13px">🔕 Notifications bloquées par le navigateur</span>':notifState()==='off'?'<button class="small primary" data-act="notifon">🔔 Activer les notifications</button>':''}</h3><div id="lb-as">${asMineHTML()}</div></div>
     <div class="paper lcard lb-wide"><h3>🃏 Tables ouvertes</h3><div id="lb-tables">${lbyTablesHTML()}</div>
      <div class="lb-code"><span class="muted">Une table en direct avec un code ?</span><input id="ncode" placeholder="ABCD" size="5" maxlength="4" style="text-transform:uppercase" value="${esc(NET.joinCode||'')}"><button class="small" data-act="njoincode">Rejoindre</button></div></div>
     <div class="paper lcard lb-wide"><h3>👥 Joueurs en ligne (<span id="lb-count">${Object.keys(LBY.players).length}</span>)</h3><div id="lb-players" data-inv="1">${lbyPlayersHTML(true)}</div></div>
@@ -4102,6 +4133,8 @@ document.addEventListener('click',e=>{
     case 'ascancel': asCancel(t.dataset.gid); return;
     case 'asforget': asDelMine(t.dataset.gid); lbyRefresh(); return;
     case 'asbot': asFillBot(t.dataset.gid); return;
+    case 'notifon': notifEnable(); return;
+    case 'notifoff': notifOff(); return;
     case 'atjoin': atJoin(t.dataset.gid); return;
     case 'atopen': atOpen(t.dataset.tid); return;
     case 'atfill': atFill(t.dataset.tid); return;
@@ -4191,6 +4224,7 @@ document.body.classList.add('vsai'); document.body.classList.add('np2');
 render();
 </script>
 <script>/* appli installable : seulement hors itch.io et hors iframe */
+try{ const mo=/#open=([gt]):([\w-]+)/.exec(location.hash); if(mo&&ONLINE){ history.replaceState(null,'',location.pathname); UI.screen='lobby'; lbyStart(); const go=()=>{ if(!LBY.uid) return setTimeout(go,500); notifOpen({k:mo[1],id:mo[2]}); }; setTimeout(go,600); } }catch(e){}
 try{ if('serviceWorker' in navigator && location.protocol==='https:' && window.self===window.top && !/itch\.(io|zone)$/.test(location.hostname) && !/claude/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(()=>{}); }catch(e){}
 </script>
 </body>
