@@ -282,8 +282,11 @@ b[data-vp].gain{animation:gainvp .35s}
 .hresume{display:flex;align-items:center;gap:14px;margin:18px auto 4px;padding:10px 22px 10px 14px;background:#fff3c4;border:3px solid var(--ink);border-radius:16px 13px 17px 12px;box-shadow:4px 5px 0 var(--ink);text-align:left;font-size:18px;max-width:520px;width:100%}
 .hresume small{font-size:14px;color:var(--muted)}
 .hr-ico{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:var(--red);color:#fff;font-size:20px;flex:none}
-.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start}
-@media (max-width:760px){.home-grid{grid-template-columns:1fr}}
+.home-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"on camp" "tiles camp" "res res";gap:16px;margin-top:16px;align-items:start}
+.home-grid>.online{grid-area:on}.home-grid>.camp{grid-area:camp}.home-grid>.hresume{grid-area:res;margin-top:2px}.home-grid>.home-tiles{grid-area:tiles;margin-top:0;grid-template-columns:repeat(2,1fr)}
+@media (max-width:760px){.home-grid{grid-template-columns:1fr;grid-template-areas:"on" "camp" "res" "tiles"}}
+.home-grid.solo{grid-template-areas:"camp" "res" "tiles"}.home-grid.solo>.home-tiles{grid-template-columns:repeat(4,1fr)}
+@media (max-width:640px){.home-grid.solo>.home-tiles{grid-template-columns:repeat(2,1fr)}}
 .home-grid.solo{grid-template-columns:1fr;max-width:560px;margin-left:auto;margin-right:auto}
 .hcard{background:#fffaf0;border:3px solid var(--ink);border-radius:18px 14px 19px 13px;box-shadow:5px 6px 0 rgba(43,35,32,.9);padding:14px 16px 16px;display:flex;flex-direction:column;position:relative}
 .hcard.camp{transform:rotate(-.4deg)}.hcard.online{transform:rotate(.4deg);background:#f1ecfb}
@@ -1386,7 +1389,7 @@ function menuHTML(){
    <div class="home-grid ${ONLINE?'':'solo'}">
     ${ONLINE?`<div class="hcard online"><div class="hc-head"><span class="hc-ico">🌐</span><div><h2>Jouer en ligne</h2></div></div>
       <button class="primary hbig" data-act="online">Entrer dans le salon <span id="asbadge" class="lbadge turn" style="display:none"></span></button></div>`:''}
-    <div class="hcard camp"><div class="hc-head"><span class="hc-ico">⚔️</span><div><h2>Campagne contre l’IA</h2><p>6 parties pour faire grandir ton équipe de héros.</p></div></div>
+    <div class="hcard camp"><div class="hc-head"><span class="hc-ico">⚔️</span><div><h2>Campagne contre l’IA</h2></div></div>
       <div class="hform">
         <label>Format ${sel('mode',[['sealed','Scellé'],['draft','Draft']],'sealed')}</label>
         <label>Adversaires ${sel('np',[['2','1 IA'],['4','Tournoi à 4 (3 IA)'],['6','Tournoi à 6 (5 IA)'],['8','Tournoi à 8 (7 IA)']],'2')}</label>
@@ -1396,13 +1399,13 @@ function menuHTML(){
         <input id="n2" type="hidden" value="${esc(UI.n2||'Joueur 2')}">
       </div>
       <button class="primary hbig" data-act="new">Lancer la campagne</button></div>
-   </div>
    ${saved&&saved.players?`<button class="hresume" data-act="resume"><span class="hr-ico">▶</span><span><b>Reprendre ma campagne</b><br><small>${esc(saved.players[0].name)} contre ${esc(saved.players[1].name)} · partie ${saved.game}/6</small></span></button>`:''}
    <div class="home-tiles">
      <button class="htile" data-act="tuto"><span>📖</span>Tutoriel</button>
      <button class="htile" data-act="cat"><span>🃏</span>Voir les cartes</button>
      <button class="htile" data-act="stats"><span>📊</span>Statistiques</button>
      <button class="htile" data-act="rules"><span>📜</span>Résumé des règles</button>
+   </div>
    </div>
    ${ONLINE?'<div class="center" style="margin:16px 0 6px"><img class="iello" src="iello.webp" alt="IELLO"></div>':''}
   </div>`;
