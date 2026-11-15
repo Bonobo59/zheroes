@@ -2360,7 +2360,7 @@ function setMyName(n){ try{localStorage.setItem('zh_name',n);}catch(e){} }
    joue le rôle de l'hôte (révélations, combats, PV…), écrit chaque étape dans zh/as/<id>/log puis rend le verrou.
    Au retour, on rejoue les étapes non vues depuis le journal. */
 const AS={on:false,gid:'',seat:0,meta:null,lock:false,curSeq:0,seen:0,fetched:0,pumping:0,subs:[],inbox:{},done:{},idle:0,tick:null,list:{},open:{},fetching:false,listAt:0};
-const ASP=g=>'zh/as/'+g, ASLOG=40, pad8=n=>String(n).padStart(8,'0');
+const ASP=g=>'zh/as/'+g, ASLOG=400, pad8=n=>String(n).padStart(8,'0');
 function asStore(){ return FBFAKE?sessionStorage:localStorage; }
 function asPid(){ try{ const st=asStore(); let p=st.getItem('zh_pid'); if(!p){ p='p'+Math.random().toString(36).slice(2,12); st.setItem('zh_pid',p); } return p; }catch(e){ return 'p-anon'; } }
 function asK(k){ return 'zh_as_'+asPid()+'_'+k; }
@@ -2823,6 +2823,8 @@ async function pumpQueue(){
       // skip stale plain states if a later one is queued and nothing animates
       const m=NET.queue.shift(); if(AS.on&&m.seq){ AS.pumping=m.seq; netOverlay(); }
       const post=mergeIncoming(m.S);
+      if(AS.on&&S&&!m.anim&&(post.phase==='reveal'||post.phase==='combat')&&(post.phase!==S.phase||post.step!==S.step||post.manche!==S.manche)){ // rattrapage : on montre chaque révélation
+        S=post; UI.screen='game'; render(); await sleep(NET.queue.length?750:0); continue; }
       if(!S||!m.anim){ if(NET.queue.length&&!NET.queue[0].anim&&!m.anim) continue; S=post; UI.screen='game'; render(); continue; }
       if(m.anim.k==='fx'){ await animateEffect(clone(S),post,m.anim.evs||[],true); }
       else if(m.anim.k==='fight'){ await guestFight(post); }
@@ -2858,7 +2860,7 @@ function intent(pl,m){
     case 'dprep': if(S.phase==='dprep'&&!S.dprep[pl]&&dpValid(P(pl).deck,m.choice)) S.dprep[pl]=m.choice; break;
     case 'draft': { const D=S.draft; if(S.phase==='draft'&&D&&m.round===D.round&&D.packs[pl].includes(m.id)){ D.op=D.op||[null,null]; D.op[pl]=m.id; } break; }
     case 'ready': if(m.key===rkey()&&(m.what==='combat'||m.what==='coche')) S.net.ready[m.what][pl]=true; break;
-    case 'coche': if(S.phase==='coche'&&m.key===rkey()){ if(m.cs&&(pl!==NET.me||AS.on)) Object.keys(m.cs).forEach(id=>{ if(P(1).cs[id]&&mancheCards(1).includes(+id)) P(1).cs[id]=m.cs[id]; }); S.net.coche[pl]=true; } break;
+    case 'coche': if(S.phase==='coche'&&m.key===rkey()){ if(m.cs&&(pl!==NET.me||AS.on)) Object.keys(m.cs).forEach(id=>{ if(P(pl).cs[id]&&mancheCards(pl).includes(+id)) P(pl).cs[id]=m.cs[id]; }); S.net.coche[pl]=true; } break;
     case 'resolve': clickResolve(pl,m.id); return;
     case 'fight': if(S.phase==='combat'&&!S.combatDone&&!S.pending.some(fires)) fightAnimated(true); return;
     case 'startgame': if(S.phase==='prep'){ startGame(); render(); } return;
