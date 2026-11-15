@@ -2921,19 +2921,14 @@ function doResolve(i){
 
 /* ---------- waiting bubble ---------- */
 function waitingText(){
-  if(TT.on&&!S&&TT.T&&TT.T.phase==='dprep'&&UI.dp&&UI.dp.done) return 'En attente des autres joueurs…';
-  if(TT.on&&!S&&TT.T){ const T=TT.T; if(T.phase==='draft'&&UI.t4sent===T.draft.round) return 'En attente des autres joueurs…'; if(T.phase==='lobby'&&!TT.isHost) return 'En attente du lancement…'; if(T.phase==='play') return 'Connexion au duel…'; return ''; }
+  if(TT.on&&!S&&TT.T){ const T=TT.T; if(T.phase==='lobby'&&!TT.isHost) return 'En attente du lancement…'; if(T.phase==='play') return 'Connexion au duel…'; return ''; }
   if(TT.on&&S&&S.phase==='gameEnd') return TT.solo?'':'En attente de l’autre table…';
-  if(UI.bd&&UI.bd.done&&((S&&S.phase==='build')||(TT.on&&TT.T&&TT.T.phase==='build'))) return TT.on?'En attente des autres joueurs…':'En attente de l’adversaire…';
   if(((S&&S.phase==='pool'&&isGuest())||(TT.on&&!S&&TT.T&&TT.T.phase==='pool'&&!TT.isHost))) return 'L’hôte prépare le pool…';
-  if(UI.dp&&UI.dp.done&&((S&&S.phase==='dprep')||(TT.on&&TT.T&&TT.T.phase==='dprep'))) return TT.on?'En attente des autres joueurs…':'En attente de l’adversaire…';
   if(!NET.on||!S) return '';
   const k=rkey();
-  if(S.phase==='draft'&&S.draft&&UI.draftSent===`${S.game}-${S.draft.round}`) return 'En attente de l’adversaire…';
   if(S.phase==='place'&&UI.placeSent===k) return '';
   if(S.phase==='reveal'&&S.step>=4&&UI.readySent==='combat-'+k) return 'En attente de l’adversaire…';
   if(S.phase==='combat'&&S.combatDone&&UI.readySent==='coche-'+k) return 'En attente de l’adversaire…';
-  if(S.phase==='coche'&&UI.oc&&UI.oc.done) return 'En attente de l’adversaire…';
   if(isGuest()&&!AS.on&&(S.phase==='prep'||S.phase==='gameEnd')) return 'En attente de l’hôte…';
   if((S.phase==='reveal'||S.phase==='combat')&&S.pending.some(e=>fires(e)&&e.pl!==ME())&&!S.pending.some(e=>fires(e)&&e.pl===ME())) return 'L’adversaire active un pouvoir…';
   return '';
