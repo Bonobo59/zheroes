@@ -1315,7 +1315,7 @@ function boardHTML(){
       ${did.length?'':'<div class="nofx">✗ Le pouvoir ne se déclenche pas : condition non remplie.</div>'}
       <ul>${F.lines.filter(l=>!/condition non remplie|Aucun effet/.test(l)||!did.length).map(l=>`<li>${iconize(l)}</li>`).join('')}</ul></div></div>`; }
   if(S.drawFx&&S.drawFx.lines.length) fx+=`<div class="fxbox"><div><b>✏️ Dessins</b><ul>${S.drawFx.lines.map(l=>`<li>${iconize(l)}</li>`).join('')}</ul></div></div>`;
-  const hint=S.pending.some(fires)?(UI.tuto?`<p class="legend center" style="color:var(--red)"><b>Touchez les cartes qui brillent pour résoudre leur effet.</b></p>`:`<p class="legend center" style="color:var(--red)"><b>⚡ Pouvoir en cours de déclenchement…</b></p>`):`<p class="legend center">Touchez une carte pour l’agrandir.</p>`;
+  const hint=S.pending.some(fires)?(UI.tuto?`<p class="legend center" style="color:var(--red)"><b>Touchez les cartes qui brillent pour résoudre leur effet.</b></p>`:''):`<p class="legend center">Touchez une carte pour l’agrandir.</p>`;
   UI.mobAct=''; const mid=midStrip();
   let mob='';
   if(MOB()){ const a=UI.mobAct||'';
