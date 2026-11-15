@@ -1324,7 +1324,7 @@ function render(){
     case 'coche': h+=cocheHTML(); break;
     case 'gameEnd': case 'campaignEnd': h+=endHTML(); break;
   }
-  app.innerHTML=h; renderModal(); netOverlay(); drawWatch(); if(LBY.on) lbyInvite(); if(S.ai) scheduleAI();
+  app.innerHTML=h; renderModal(); netOverlay(); drawWatch(); if(LBY.on) lbyInvite(); if(S.ai) scheduleAI(); autoResolveSoon();
 }
 function netOverlay(){
   let w=document.getElementById('waitb'); const txt=waitingText();
@@ -2385,7 +2385,7 @@ function asNeed(st){ // qui doit jouer maintenant ?
       case 'dprep': n[pl]=!(st.dprep&&st.dprep[pl]); break;
       case 'place': n[pl]=!(N&&N.place&&N.place[pl]); break;
       case 'coche': n[pl]=!(N&&N.coche&&N.coche[pl]); break;
-      case 'reveal': case 'combat': n[pl]=(st.pending||[]).some(e=>e.pl===pl&&fires(e)&&!(st.armed||[]).includes(e.pl+':'+e.id)); break;
+      case 'reveal': case 'combat': n[pl]=false; break;
     } });
   return n;
 }
@@ -2467,7 +2467,7 @@ function asProcess(){
   Object.keys(AS.inbox||{}).sort().forEach(k=>{ if(AS.done[k]) return; AS.done[k]=1; const it=AS.inbox[k]; LBY.db.remove(ASP(AS.gid)+'/in/'+k);
     try{ intent(+it.seat,JSON.parse(it.m)); }catch(e){ console.warn('intent',e); } });
 }
-function asAutoPending(){ return !!S&&(S.phase==='reveal'||S.phase==='combat')&&!S.pending.some(fires); }
+function asAutoPending(){ return !!S&&(S.phase==='reveal'||S.phase==='combat'); }
 function asDropHost(){ NET.host=false; AS.lock=false; AS.idle=0; }
 async function asRelease(){
   if(!AS.lock) return;
@@ -2914,6 +2914,18 @@ function clickResolve(pl,id){
   if(G.every(x=>S.armed.includes(x.pl+':'+x.id))) resolveGroup(G); else { save(); render(); }
 }
 const isArmed=e=>(S.armed||[]).includes(e.pl+':'+e.id);
+// les pouvoirs se déclenchent tout seuls : la carte grossit un instant, puis l'effet s'applique
+function autoResolveSoon(){
+  if(UI.arT||!S||UI.tuto||isGuest()||(NET.on&&!NET.host)) return;
+  if(!(S.phase==='reveal'||S.phase==='combat')||!S.pending||!S.pending.some(e=>fires(e)&&!isArmed(e))) return;
+  UI.arT=setTimeout(()=>{ UI.arT=null;
+    if(!S||UI.tuto||isGuest()||(NET.on&&!NET.host)||!(S.phase==='reveal'||S.phase==='combat')) return;
+    if(UI.anim||UI.auto||drawBusy()){ autoResolveSoon(); return; }
+    const G=S.pending.filter(e=>fires(e)&&!isArmed(e)); if(!G.length) return;
+    [...new Set(G.map(e=>e.pl))].forEach(pl=>{ const e=G.find(x=>x.pl===pl); if(e&&!UI.anim) clickResolve(pl,e.id); });
+    if(S&&S.pending&&S.pending.some(e=>fires(e)&&!isArmed(e))) autoResolveSoon();
+  },1100*(typeof SPD==='number'?SPD:1));
+}
 function doResolve(i){
   const pre=clone(S); const e=S.pending.splice(i,1)[0]; if(!e){render();return;}
   S.fxStep=(S.fxStep||0)+1; S.drawFx=null; S.lastFx=resolveEffect(e); checkEnd(); const evs=FXEV.slice(); const post=clone(S);
