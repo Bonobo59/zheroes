@@ -893,7 +893,7 @@ const FX={
 20:{draw:X=>X.enemies.filter(u=>vieC(u)>=3).length, e1:X=>T(X.me,X.drawn()), c2:X=>X.complete(), e2:X=>CA(X.me,X.v(0,2))},
 21:{draw:X=>X.ahead.filter(u=>alN(u)===0).length, c1:X=>X.complete(), e1:X=>CL(X.ahead,'S'), e2:X=>CA(X.allies.filter(u=>al(u,'S')),X.v(0,0))},
 22:{draw:X=>X.facingDestroyed?1:0, c1:X=>!!X.behind&&atk(X.behind)<=3, e1:X=>CA(X.behind,X.v(0,0)*X.drawn()), e2:X=>T(X.behind,X.drawn())},
-23:{draw:X=>(X.enemies.length+(X.dead&&X.facingDestroyed?1:0))>X.allies.length?1:0, c1:X=>X.drawn()>=2, e1:X=>X.revive(), c2:X=>X.complete(), e2:X=>SH(X.me)},
+23:{draw:X=>X.enemies.length>X.allies.length?1:0, c1:X=>X.drawn()>=2, e1:X=>X.revive(), c2:X=>X.complete(), e2:X=>SH(X.me)},
 24:{draw:X=>al(X.behind,'S')&&al(X.behind,'E')?1:0, e1:X=>CV(X.last,X.v(0,0)*X.drawn()), c2:X=>!!X.last&&tok(X.last)<=6, e2:X=>SH(X.last)},
 25:{draw:X=>alN(X.front)>=1?1:0, c1:X=>alN(X.at(1))>=1, e1:X=>T(X.at(1),X.drawn()), c2:X=>tok(X.at(1))>=10, e2:X=>X.VP(2)},
 26:{draw:X=>X.ahead.filter(u=>al(u,'E')).length, c1:X=>X.drawn()>=3, e1:X=>{CL(X.front,'L');T(X.front,2);}, c2:X=>X.complete(), e2:X=>CA(X.ahead.filter(u=>al(u,'E')&&al(u,'L')),X.v(0,1))},
