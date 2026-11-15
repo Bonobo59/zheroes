@@ -348,6 +348,7 @@ body.tuto #app{pointer-events:none}
 .lobby2{max-width:1000px;margin:10px auto 0;padding:0 4px}
 #asreplay{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:650;background:var(--ink);color:#fff9ee;padding:8px 10px 8px 16px;border-radius:24px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 14px rgba(0,0,0,.4);font-size:15px;max-width:94vw}
 #asreplay button{background:#fff9ee}
+#app .lobby2 .paper{background:#fffaf0}
 .lobby2 .lcard,.lobby2 .lb-head{border:2px solid var(--ink);border-radius:14px 12px 15px 11px!important;box-shadow:3px 4px 0 rgba(0,0,0,.45)!important}
 .lobby2 .lcard h3{border-bottom:2px dashed var(--line);padding-bottom:6px}
 .lb-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px}
@@ -3100,6 +3101,9 @@ function lobbyHTML(){
    <div class="paper lb-head"><img src="logo.webp" alt="Zheroes" class="lb-logo"><div class="lb-title"><h2>Salon en ligne</h2><div id="lb-status">${lbyStatusHTML()}</div></div>
      <label class="lb-name">Ton nom <input id="nname" value="${esc(myName())}" size="12" maxlength="20"></label></div>
    ${NET.err?`<div class="note" style="background:#f8d7d2">${esc(NET.err)}</div>`:''}
+   <div class="lb-grid" style="margin-bottom:14px">
+    <div class="paper lcard lb-wide"><h3>🃏 Tables ouvertes</h3><div id="lb-tables">${lbyTablesHTML()}</div></div>
+   </div>
    <div id="lb-mine">${lbyMineHTML()}</div>
    <div class="lb-grid">
     <div class="paper lcard lb-wide"><h3>✨ Créer une table</h3>
@@ -3112,8 +3116,6 @@ function lobbyHTML(){
      ${hs&&hs.S&&pl==='live'?`<div class="center" style="margin-top:6px"><button class="small" data-act="nresume">Reprendre ma table ${esc(hs.code)} (partie ${hs.S.game})</button></div>`:''}
     </div>
     <div class="paper lcard lb-wide"><h3>⏳ Mes parties en tour par tour <span id="lb-asn" class="lbadge turn" style="display:none"></span><span style="flex:1"></span>${notifState()==='on'?'<button class="small" data-act="notifoff">🔔 Notifications activées</button>':notifState()==='denied'?'<span class="muted" style="font-size:13px">🔕 Notifications bloquées par le navigateur</span>':notifState()==='off'?'<button class="small primary" data-act="notifon">🔔 Activer les notifications</button>':''}</h3><div id="lb-as">${asMineHTML()}</div></div>
-    <div class="paper lcard lb-wide"><h3>🃏 Tables ouvertes</h3><div id="lb-tables">${lbyTablesHTML()}</div>
-     <div class="lb-code"><span class="muted">Une table en direct avec un code ?</span><input id="ncode" placeholder="ABCD" size="5" maxlength="4" style="text-transform:uppercase" value="${esc(NET.joinCode||'')}"><button class="small" data-act="njoincode">Rejoindre</button></div></div>
     <div class="paper lcard lb-wide"><h3>👥 Joueurs en ligne (<span id="lb-count">${Object.keys(LBY.players).length}</span>)</h3><div id="lb-players" data-inv="1">${lbyPlayersHTML(true)}</div></div>
    </div>
    <div class="center" style="margin:10px 0"><button data-act="nback">← Retour au menu</button></div><p class="center muted" style="font-size:12px;margin:0 0 10px">Version ${PROTO}</p></div>`;
