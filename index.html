@@ -351,6 +351,19 @@ body.tuto #app{pointer-events:none}
 #app .lobby2 .paper{background:#fffaf0}
 .lobby2 .lcard,.lobby2 .lb-head{border:2px solid var(--ink);border-radius:14px 12px 15px 11px!important;box-shadow:3px 4px 0 rgba(0,0,0,.45)!important}
 .lobby2 .lcard h3{border-bottom:2px dashed var(--line);padding-bottom:6px}
+.lb-hero{text-align:center;padding:10px 0 6px;margin-bottom:12px}
+.lb-biglogo{width:min(300px,70%);display:block;margin:0 auto -6px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.35))}
+.lb-banner{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff9ee;padding:6px 26px 8px;border-radius:6px 10px 7px 12px;transform:rotate(-1.2deg);box-shadow:3px 4px 0 rgba(0,0,0,.25);position:relative;z-index:2}
+.lb-banner h2{margin:0;font-family:'Permanent Marker',inherit;font-size:30px;color:#fff9ee;letter-spacing:.5px}
+.lb-globe{font-size:26px}
+.lb-sub{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+.lb-pill{display:inline-flex;align-items:center;gap:8px;background:#fffaf0;border:2px solid var(--ink);border-radius:999px;padding:4px 14px;box-shadow:2px 3px 0 rgba(0,0,0,.35);font-size:15px}
+.lb-pill .note{border-radius:999px}
+.lb-name input{font-size:16px;border:0;border-bottom:2px dashed var(--line);background:transparent;border-radius:0;padding:2px 4px;width:150px}
+#app .lobby2 .lcard{position:relative;margin-top:10px;padding-top:16px}
+#app .lobby2 .lcard::before{content:'';position:absolute;top:-11px;left:50%;width:84px;height:22px;transform:translateX(-50%) rotate(-3deg);background:rgba(245,197,66,.75);border:1px solid rgba(0,0,0,.08)}
+#app .lobby2 .lcard:nth-child(odd){transform:rotate(-.25deg)}#app .lobby2 .lcard:nth-child(even){transform:rotate(.25deg)}
+@media (max-width:640px){.lb-banner h2{font-size:24px}.lb-biglogo{width:min(240px,72%)}}
 .lb-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px}
 .lb-logo{width:150px;max-width:34%}
 .lb-title{flex:1;min-width:160px}.lb-title h2{margin:0 0 2px;font-family:'Permanent Marker',inherit;font-size:28px}
@@ -3096,8 +3109,9 @@ function lobbyHTML(){
   const hs=loadHostSave(), pl=UI.lplay||'live', busy=(NET.on&&NET.host)||(TT.on&&!TT.solo);
   const seg=(id,v,opts)=>`<div class="seg">${opts.map(([k,l])=>`<button class="${v===k?'on':''}" data-act="lseg" data-k="${id}" data-v="${k}">${l}</button>`).join('')}</div>`;
   return `<div class="lobby2">
-   <div class="paper lb-head"><img src="logo.webp" alt="Zheroes" class="lb-logo"><div class="lb-title"><h2>Salon en ligne</h2><div id="lb-status">${lbyStatusHTML()}</div></div>
-     <label class="lb-name">Ton nom <input id="nname" value="${esc(myName())}" size="12" maxlength="20"></label></div>
+   <div class="lb-hero"><img src="logo.webp" alt="Zheroes" class="lb-biglogo">
+     <div class="lb-banner"><span class="lb-globe">🌐</span><h2>Salon en ligne</h2></div>
+     <div class="lb-sub"><span id="lb-status" class="lb-pill">${lbyStatusHTML()}</span><label class="lb-pill lb-name">✏️ Ton nom <input id="nname" value="${esc(myName())}" size="12" maxlength="20" placeholder="Ton nom"></label></div></div>
    ${NET.err?`<div class="note" style="background:#f8d7d2">${esc(NET.err)}</div>`:''}
    <div class="lb-grid" style="margin-bottom:14px">
     <div class="paper lcard lb-wide"><h3>🃏 Tables ouvertes</h3><div id="lb-tables">${lbyTablesHTML()}</div></div>
