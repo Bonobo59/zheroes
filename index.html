@@ -1376,9 +1376,7 @@ function netOverlay(){
   let w=document.getElementById('waitb'); const txt=waitingText();
   if(txt){ if(!w){ w=document.createElement('div'); w.id='waitb'; document.body.appendChild(w);} if(w.dataset.t!==txt){ w.dataset.t=txt; w.innerHTML=`<span class="wdot">⏳</span> ${esc(txt)}`; } }
   else if(w) w.remove();
-  let rp=document.getElementById('asreplay'); const rep=AS.on&&!NET.host&&S&&(NET.queue.length>0||(NET.busy&&AS.curSeq>AS.seen));
-  if(rep){ if(!rp){ rp=document.createElement('div'); rp.id='asreplay'; rp.innerHTML='<span>⏪ Ce qui s’est passé pendant ton absence…</span> <button class="small" data-act="asskip">Passer ⏩</button>'; rp.onclick=e=>{ if(e.target.closest('[data-act=asskip]')) asSkip(); }; document.body.appendChild(rp);} }
-  else if(rp) rp.remove();
+  { const rp=document.getElementById('asreplay'); if(rp) rp.remove(); }
   let o=document.getElementById('netlost');
   const lost=(NET.on&&!AS.on&&S&&NET.conn&&!NET.alive)||(TT.on&&TT.lost);
   if(lost){ if(!o){ o=document.createElement('div'); o.id='netlost'; document.body.appendChild(o);} o.innerHTML=`<div class="paper center"><h3>Connexion perdue avec ${NET.host?'ton adversaire':'l’hôte'}</h3><p class="muted">${NET.host?'Ta table reste ouverte : ton adversaire peut revenir avec le même code ('+esc(NET.code)+').':'Tu peux tenter de te reconnecter.'}</p>${NET.host?'':'<button class="primary" data-act="nreconnect">Se reconnecter</button> '}<button data-act="nleave">Quitter la partie</button></div>`; }
