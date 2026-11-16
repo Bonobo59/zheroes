@@ -485,6 +485,7 @@ body.vsai .p2lbl{display:none}
 .pickedgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;max-width:760px;margin:0 auto}
 .draft4.dgrid{row-gap:4px;gap:4px 6px;grid-template-columns:repeat(4,1fr)!important}
 .dgrid .cardwrap{position:relative}
+body:not(.mob) .draft4.dgrid{width:calc(var(--w4,760px)*.82);margin-left:calc(50% - var(--w4,760px)*.41)}
 body.mob .draft4.dgrid{grid-template-columns:repeat(2,1fr)!important;gap:4px 6px}
 body.mob .dvalid{font-size:19px;padding:.45em .9em}
 .dvalid:hover{transform:translate(-50%,-50%) scale(1.05)!important}.dvalid:active{transform:translate(-50%,-50%) scale(.97)!important}
