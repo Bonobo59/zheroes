@@ -411,6 +411,9 @@ body:has(.board) .wrap{padding:4px}
 .pinfo{font-family:'Permanent Marker';font-size:20px}
 .draft4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:760px;margin:0 auto}
 .draft4 .lbl{text-align:center}
+body:not(.mob) .draft4{width:var(--w4,760px);max-width:none;margin-left:calc(50% - var(--w4,760px)/2);margin-right:0}
+body:not(.mob) .cochewrap>.cochegrid{width:var(--w4,760px)!important;max-width:none;align-self:flex-start;margin-left:calc(50% - var(--w4,760px)/2)!important}
+body:not(.mob) .dp3{width:calc(var(--w4,760px)*.75);max-width:none;margin-left:calc(50% - var(--w4,760px)*.375);margin-right:0}
 
 #hoverzoom{position:fixed;z-index:300;width:min(320px,42vw);pointer-events:none;filter:drop-shadow(0 8px 24px rgba(0,0,0,.55));animation:hzin .15s ease-out}
 #hoverzoom .zc{box-shadow:0 0 0 3px #fff}
@@ -2137,6 +2140,9 @@ function fitZoom(){
   let z=desk?Math.min(w/1040,h/800):1; z=Math.max(1,Math.min(2.4,Math.floor(z*20)/20));
   Z=z; for(const id of ['app','modal']){ const el=document.getElementById(id); if(el) el.style.zoom=z===1?'':String(z); }
   document.documentElement.style.setProperty('--Z',z);
+  // largeur des rangées de 4 cartes (draft, préparation, coche) : on remplit la hauteur disponible
+  const vw=w/z, vh=h/z, w4=Math.round(Math.max(760,Math.min(vw-40,(vh-270)*0.585*4+18)));
+  document.documentElement.style.setProperty('--w4',w4+'px');
 }
 
 /* ================= ONLINE (host-authoritative) ================= */
