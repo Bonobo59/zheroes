@@ -1792,7 +1792,7 @@ function bump(el,cls){ if(!el) return; el.classList.remove(cls); void el.offsetW
 async function clash(a,b){
   const ea=cardEl(0,a.id), eb=cardEl(1,b.id); if(!ea||!eb) return;
   const ra=ea.getBoundingClientRect(), rb=eb.getBoundingClientRect();
-  const dy=(ra.top-rb.top)-rb.height*0.55; // distance to close the gap
+  const dy=((ra.top-rb.top)-rb.height*0.55)/Z; // distance to close the gap (px CSS de #app)
   const opt={duration:230,easing:'cubic-bezier(.5,0,1,.6)',fill:'forwards'};
   ea.style.zIndex=6; eb.style.zIndex=6;
   const x=ea.animate([{transform:'none'},{transform:`translateY(${-dy/2}px) rotate(-3deg)`}],opt);
@@ -1846,7 +1846,7 @@ async function flipRender(dur=600){
   const before=boardKeys(); render(); const an=[];
   document.querySelectorAll('#app .board .zc[data-pl][data-id]').forEach(el=>{
     const k=el.dataset.pl+'-'+el.dataset.id, b=before[k]; if(!b) return;
-    const a=el.getBoundingClientRect(); const dx=b.left-a.left, dy=b.top-a.top, s=b.width/a.width;
+    const a=el.getBoundingClientRect(); const dx=(b.left-a.left)/Z, dy=(b.top-a.top)/Z, s=b.width/a.width;
     if(Math.abs(dx)<1&&Math.abs(dy)<1&&Math.abs(s-1)<.01) return;
     el.style.zIndex=7;
     an.push(el.animate([{transformOrigin:'top left',transform:`translate(${dx}px,${dy}px) scale(${s})`},{transformOrigin:'top left',transform:'none'}],{duration:dur*SPD,easing:'ease-in-out'}).finished.then(()=>el.style.zIndex=''));
@@ -2128,7 +2128,16 @@ document.addEventListener('click',e=>{
   else if(a==='prev'&&TUTO.i>0){TUTO.i--;tutoShow();}
   else if(a==='quit') endTuto();
 },true);
-window.addEventListener('resize',()=>{ if(UI.tuto) tutoShow(); });
+window.addEventListener('resize',()=>{ fitZoom(); if(UI.tuto) tutoShow(); });
+/* Grand écran d'ordinateur : tout le jeu grandit avec la fenêtre (zoom CSS sur #app et #modal) */
+let Z=1;
+function fitZoom(){
+  const w=window.innerWidth, h=window.innerHeight;
+  const desk=!!(window.matchMedia&&matchMedia('(hover: hover) and (pointer: fine)').matches)&&w>=1100;
+  let z=desk?Math.min(w/1040,h/800):1; z=Math.max(1,Math.min(2.4,Math.floor(z*20)/20));
+  Z=z; for(const id of ['app','modal']){ const el=document.getElementById(id); if(el) el.style.zoom=z===1?'':String(z); }
+  document.documentElement.style.setProperty('--Z',z);
+}
 
 /* ================= ONLINE (host-authoritative) ================= */
 const ONLINE=true;
@@ -4174,10 +4183,11 @@ function showHover(z,x,y){
 }
 function placeHover(x,y){
   const el=HZ.el; if(!el) return;
-  const w=el.offsetWidth,h=el.offsetHeight,vw=window.innerWidth,vh=window.innerHeight;
+  el.style.zoom=Z===1?'':String(Z);
+  const w=el.offsetWidth*Z,h=el.offsetHeight*Z,vw=window.innerWidth,vh=window.innerHeight;
   let left=x+24; if(left+w>vw-8) left=x-w-24; if(left<8) left=Math.max(8,(vw-w)/2);
   let top=y-h/2; top=Math.min(Math.max(8,top),vh-h-8);
-  el.style.left=left+'px'; el.style.top=top+'px';
+  el.style.left=(left/Z)+'px'; el.style.top=(top/Z)+'px';
 }
 if(window.matchMedia&&matchMedia('(hover: hover) and (pointer: fine)').matches){
   let lx=0,ly=0;
@@ -4372,7 +4382,7 @@ document.addEventListener('input',e=>{ if(e.target.id==='n1'||e.target.id==='nna
 document.addEventListener('change',e=>{ if(e.target.id==='t4lvl') TT.aiLevel=e.target.value; if(e.target.id==='opp'||e.target.id==='np'){ const np=$('#np')?+$('#np').value:2; document.body.classList.add('vsai'); document.body.classList.toggle('np2',np===2); } if(e.target.id==='nmode') NET.mode=e.target.value; if(e.target.id==='stfilter'){ UI.stFilter=e.target.value; render(); } if(e.target.id==='stmin'){ UI.stMin=Math.max(0,+e.target.value||0); render(); } });
 (function(){ const m=ONLINE&&location.hash.match(/join-([A-Z0-9]{4})/i); if(m){ NET.joinCode=m[1].toUpperCase(); UI.screen='lobby'; lobbyStart(); } })();
 document.body.classList.add('vsai'); document.body.classList.add('np2');
-render();
+fitZoom(); render();
 </script>
 <script>/* appli installable : seulement hors itch.io et hors iframe */
 try{ const mo=/#open=([gt]):([\w-]+)/.exec(location.hash); if(mo&&ONLINE){ history.replaceState(null,'',location.pathname); UI.screen='lobby'; lbyStart(); const go=()=>{ if(!LBY.uid) return setTimeout(go,500); notifOpen({k:mo[1],id:mo[2]}); }; setTimeout(go,600); } }catch(e){}
