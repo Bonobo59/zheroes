@@ -1401,12 +1401,9 @@ function netOverlay(){
 function menuHTML(){
   if(ONLINE&&(asMine().length||atMine().length)){ setTimeout(()=>{ if(!LBY.on) lbyStart(); else { asRefreshList(); asBadge(); } },300); }
   const saved=loadSaved();
-  // éventail de cartes décoratif (change chaque jour)
-  const ids=DEFS.map(c=>c.id), day=Math.floor(Date.now()/864e5), fan=[0,1,2,3,4].map(k=>ids[(day*37+k*23)%ids.length]);
-  const fanH=fan.map((id,k)=>`<img class="fanc f${k}" src="${imgSrc(id,false)}" alt="" loading="lazy" draggable="false">`).join('');
   const sel=(id,opts,v)=>`<select id="${id}">${opts.map(([k,l])=>`<option value="${k}" ${v===k?'selected':''}>${l}</option>`).join('')}</select>`;
   return `<div class="home">
-   <div class="home-hero"><div class="fan">${fanH}</div>
+   <div class="home-hero">
      <img class="biglogo" src="logo.webp" alt="Zheroes First Draft">
      <p class="tagline">Autobattler legacy · un jeu d’Adrien FENOUILLET et Rémi MATHIEU</p></div>
    <div class="home-grid ${ONLINE?'':'solo'}">
@@ -2137,7 +2134,7 @@ let Z=1;
 function fitZoom(){
   const w=window.innerWidth, h=window.innerHeight;
   const desk=!!(window.matchMedia&&matchMedia('(hover: hover) and (pointer: fine)').matches)&&w>=1100;
-  let z=desk?Math.min(w/1040,h/800):1; z=Math.max(1,Math.min(2.4,Math.floor(z*20)/20));
+  let z=desk?Math.min(w/1040,h/840):1; z=Math.max(desk?0.8:1,Math.min(2.4,Math.floor(z*20)/20));
   Z=z; for(const id of ['app','modal']){ const el=document.getElementById(id); if(el) el.style.zoom=z===1?'':String(z); }
   document.documentElement.style.setProperty('--Z',z);
   // largeur des rangées de 4 cartes (draft, préparation, coche) : on remplit la hauteur disponible
