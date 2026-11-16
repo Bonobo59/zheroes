@@ -1395,7 +1395,7 @@ function netOverlay(){
   { const rp=document.getElementById('asreplay'); if(rp) rp.remove(); }
   let o=document.getElementById('netlost');
   const lost=(NET.on&&!AS.on&&S&&NET.conn&&!NET.alive)||(TT.on&&TT.lost);
-  if(lost){ if(!o){ o=document.createElement('div'); o.id='netlost'; document.body.appendChild(o);} o.innerHTML=`<div class="paper center"><h3>Connexion perdue avec ${NET.host?'ton adversaire':'l’hôte'}</h3><p class="muted">${NET.host?'Ta table reste ouverte : ton adversaire peut revenir avec le même code ('+esc(NET.code)+').':'Tu peux tenter de te reconnecter.'}</p>${NET.host?'':'<button class="primary" data-act="nreconnect">Se reconnecter</button> '}<button data-act="nleave">Quitter la partie</button></div>`; }
+  if(lost){ if(!o){ o=document.createElement('div'); o.id='netlost'; document.body.appendChild(o);} o.innerHTML=`<div class="paper center"><h3>Connexion perdue avec ${NET.host?'ton adversaire':'l’hôte'}</h3><p class="muted">${NET.host?'Ta table reste ouverte : ton adversaire peut revenir la rejoindre.':'Tu peux tenter de te reconnecter.'}</p>${NET.host?'':'<button class="primary" data-act="nreconnect">Se reconnecter</button> '}<button data-act="nleave">Quitter la partie</button></div>`; }
   else if(o) o.remove();
 }
 function menuHTML(){
@@ -2407,14 +2407,13 @@ function lbyStatusHTML(){
 function lbyMineHTML(){
   if(TT.on&&!TT.solo&&TT.isHost&&TT.T&&TT.T.phase==='lobby'){ const n=TT.T.names.filter(Boolean).length, N=TT.T.n||4;
     return `<div class="netbox mine"><h3>🟡 Ta table — Tournoi ${N} joueurs ${({t4s:'scellé',t4d:'draft',t4b:'construit',t4p:'pool'}[NET.mode]||'')}</h3>
-      <p style="margin:2px 0">Code <b>${esc(NET.code)}</b> · ${SET_LBL[TT.T.set||'base']} · ${n}/${N} joueurs : ${TT.T.names.filter(Boolean).map(esc).join(', ')}</p>
+      <p style="margin:2px 0">${SET_LBL[TT.T.set||'base']} · ${n}/${N} joueurs : ${TT.T.names.filter(Boolean).map(esc).join(', ')}</p>
       ${n<N?`<p style="margin:2px 0;font-size:14px">Les places libres seront prises par des IA au lancement. <label>Niveau : <select id="t4lvl">${['facile','normal','difficile'].map(k=>`<option value="${k}" ${(TT.aiLevel||'normal')===k?'selected':''}>${AILVL_LBL[k]}</option>`).join('')}</select></label></p>`:''}
       <div class="row" style="flex-wrap:wrap"><button class="primary" data-act="t4start">Lancer le tournoi${n<N?` (${N-n} IA)`:''}</button><button data-act="nleave">Fermer ma table</button></div></div>`; }
   if(NET.on&&NET.host&&!S){
     return `<div class="netbox mine"><h3>🟡 Ta table — ${esc(modeLabel(NET.mode))}</h3>
       <p style="margin:2px 0">Visible par tous dans le lobby. La partie démarre dès qu’un joueur la rejoint.</p>
       <p style="margin:2px 0;font-size:14px">${esc(NET.room||'')}</p>
-      <p style="margin:2px 0" class="muted">Code : <b>${esc(NET.code)}</b></p>
       <div class="row"><button data-act="nleave">Fermer ma table</button></div></div>`; }
   return '';
 }
@@ -3148,15 +3147,12 @@ function hostingHTML(){
   const link=location.href.split('#')[0]+'#join-'+NET.code;
   return `<div class="paper" style="margin-top:10px"><h2>Ta table est ouverte</h2>
    ${NET.err?`<div class="note" style="background:#f8d7d2">${esc(NET.err)}</div>`:''}
-   <p>Code de la table :</p><div class="bigcode">${esc(NET.code)}</div>
    <p class="center" style="margin:4px 0">Cartes : <b>${SET_LBL[NET.set||curSetPref()]}</b></p>
-   <p class="muted">Donne ce code à ton ami, ou envoie-lui ce lien :</p>
-   <div class="row"><input id="nlink" value="${esc(link)}" readonly style="flex:1;font-size:13px"><button class="small" data-act="ncopy">Copier</button></div>
    <p class="center" style="margin-top:14px">${NET.status==='opening'?'Ouverture de la table…':'En attente d’un adversaire…'}</p>
    <div class="netbox"><h3>Inviter un joueur en ligne</h3><div id="lb-players" data-inv="1">${lbyPlayersHTML(true)}</div></div>
    <div class="center"><button data-act="nleave">Fermer la table</button></div></div>`;
 }
-function joiningHTML(){ if(AS.on) return `<div class="paper center" style="margin-top:10px"><h2>Chargement de la partie…</h2><button data-act="nleave">Retour au lobby</button></div>`; return `<div class="paper center" style="margin-top:10px"><h2>Connexion à la table ${esc(NET.code)}…</h2><p class="muted" id="jstep">${esc(NET.joinStep||'Ça prend quelques secondes.')}</p><button data-act="nleave">Annuler</button></div>`; }
+function joiningHTML(){ if(AS.on) return `<div class="paper center" style="margin-top:10px"><h2>Chargement de la partie…</h2><button data-act="nleave">Retour au lobby</button></div>`; return `<div class="paper center" style="margin-top:10px"><h2>Connexion à la table…</h2><p class="muted" id="jstep">${esc(NET.joinStep||'Ça prend quelques secondes.')}</p><button data-act="nleave">Annuler</button></div>`; }
 
 
 /* ================= TOURNOI 4 JOUEURS ================= */
@@ -3468,8 +3464,6 @@ function tourHTML(){
     const link=location.href.split('#')[0]+'#join-'+NET.code; const n=T.names.filter(Boolean).length;
     const N=T.n||4;
     return `<div class="paper" style="margin-top:10px"><h2>🏆 Tournoi ${N} joueurs — ${modeLabel(T.mode)}</h2>
-      ${TT.isHost?`<p>Code de la table :</p><div class="bigcode">${esc(NET.code)}</div>
-      <div class="row"><input id="nlink" value="${esc(link)}" readonly style="flex:1;font-size:13px"><button class="small" data-act="ncopy">Copier</button></div>`:''}
       <h3>Joueurs (${n}/${N})</h3>
       ${tSeats().map(s=>`<div class="tablerow"><span>J${s+1} · ${T.names[s]?`<b>${esc(T.names[s])}</b>${s===TT.seat?' (toi)':''}`:'<span class="muted">en attente…</span>'}</span></div>`).join('')}
       ${TT.isHost&&n<N?`<div class="note">Les places libres seront prises par des IA au lancement. <label>Niveau des IA : <select id="t4lvl">${['facile','normal','difficile'].map(k=>`<option value="${k}" ${(TT.aiLevel||'normal')===k?'selected':''}>${AILVL_LBL[k]}</option>`).join('')}</select></label></div>
