@@ -483,6 +483,10 @@ body.vsai .p2lbl{display:none}
 .waitbtn.sm{font-size:12px;padding:3px 4px;width:100%;line-height:1.1}
 @keyframes wshake2{0%,60%,100%{transform:rotate(0)}65%{transform:translateX(-4px) rotate(-2deg)}70%{transform:translateX(4px) rotate(2deg)}75%{transform:translateX(-3px) rotate(-1deg)}80%{transform:translateX(2px)}}
 .pickedgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;max-width:760px;margin:0 auto}
+.draft4.dgrid{row-gap:4px;gap:4px 6px;grid-template-columns:repeat(4,1fr)!important}
+.dgrid .cardwrap{position:relative}
+.dvalid:hover{transform:translate(-50%,-50%) scale(1.05)!important}.dvalid:active{transform:translate(-50%,-50%) scale(.97)!important}
+.dvalid{position:absolute;left:50%;top:27%;transform:translate(-50%,-50%);z-index:60;background:#2e8b57!important;color:#fff!important;border:3px solid #fff!important;font-size:clamp(14px,2.2vw,24px);font-weight:bold;padding:.45em .9em;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,.5);white-space:nowrap;animation:dcin .2s ease-out;cursor:pointer}
 @media (max-width:520px){.pickedgrid{grid-template-columns:repeat(4,1fr)}}
 .pendwrap.armed{box-shadow:0 0 0 3px #2f8f4e}
 .pendtag.wait{background:#fff3c4;animation:wshake2 1.6s infinite}
@@ -1434,24 +1438,19 @@ function menuHTML(){
    ${ONLINE?'<div class="center" style="margin:16px 0 6px"><img class="iello" src="iello.webp" alt="IELLO"></div>':''}
   </div>`;
 }
-function draftPage(pack,selId,key,ok){
-  const pages=Math.max(1,Math.ceil(pack.length/4)); const k=key||`${S.game}-${S.draft.round}-${NET.on?NET.me:S.draft.turn}`;
-  if(UI.dpKey!==k){UI.dpKey=k;UI.dpage=0;} UI.dpage=Math.min(Math.max(0,UI.dpage),pages-1);
-  const cur=pack.slice(UI.dpage*4,UI.dpage*4+4);
-  return `<div class="dpager"><button class="parr" data-act="dprev" ${UI.dpage>0?'':'disabled'}>◀</button><span class="pinfo">${UI.dpage+1} / ${pages}</span><button class="parr" data-act="dnext" ${UI.dpage<pages-1?'':'disabled'}>▶</button></div>
-    <div class="draft4">${ok&&selId&&MOB()?'<div class="dcwrap"><button class="dcenter" data-act="dconfirm">✔ Valider</button></div>':''}${cur.map(id=>`<div class="handcard"><div class="cardwrap" data-act="dpick" data-id="${id}">${cardHTML(null,id,{cls:selId===id?'sel':''})}</div>
-      <div class="lbl">${selId===id?'<b>✓</b>':''}</div></div>`).join('')}</div>`;
+function draftPage(pack,selId,key,ok){ // toutes les cartes du paquet en grille ; « Valider ? » sur l'illustration de la carte choisie
+  return `<div class="draft4 dgrid">${pack.map(id=>`<div class="handcard"><div class="cardwrap" data-act="dpick" data-id="${id}">${cardHTML(null,id,{cls:selId===id?'sel':''})}${ok&&selId===id?'<button class="dvalid" data-act="dconfirm">Valider ?</button>':''}</div></div>`).join('')}</div>`;
 }
-function pickedHTML(ids){ if(!ids||!ids.length) return ''; return `${MOB()?'<hr class="dsep">':''}<h3 style="margin-top:12px">Déjà choisies (${ids.length}/12)</h3><div class="pickedgrid">${ids.map(id=>`<div class="cardwrap" data-act="zoom" data-id="${id}">${cardHTML(null,id,{})}</div>`).join('')}</div>`; }
+function pickedHTML(ids){ if(!ids||!ids.length) return ''; return `${MOB()?'<hr class="dsep">':''}<h3 style="margin-top:12px">Déjà choisies (${ids.length}/12)</h3><div class="pickedgrid draft4 dgrid">${ids.map(id=>`<div class="cardwrap" data-act="zoom" data-id="${id}">${cardHTML(null,id,{})}</div>`).join('')}</div>`; }
 function draftHTML(){
   const D=S.draft, pl=NET.on?NET.me:D.turn, pack=D.packs[pl];
   if(NET.on){ const sent=UI.draftSent===`${S.game}-${D.round}`; if(UI.dKey!==`${S.game}-${D.round}`){UI.dKey=`${S.game}-${D.round}`;UI.dpick=null;}
     return `<div class="paper"><div class="dhead"><b>Draft</b> · tour ${D.round+1}/12 · deck ${P(pl).deck.length}/12${draftDirHTML(D)}</div>
     ${draftPage(pack,UI.dpick,null,!sent)}
-    <div class="center" style="margin-top:8px">${sent?'<button class="waitbtn" disabled>⏳ En attente de l’autre joueur…</button>':`<button class="primary dbtm" data-act="dconfirm" ${UI.dpick?'':'disabled'}>Valider ma carte</button>`}</div>${pickedHTML(P(pl).deck)}</div>`; }
+    ${sent?'<div class="center" style="margin-top:8px"><button class="waitbtn" disabled>⏳ En attente de l’autre joueur…</button></div>':''}${pickedHTML(P(pl).deck)}</div>`; }
   return `<div class="paper"><div class="dhead"><b>Draft — ${esc(P(pl).name)}</b> · tour ${D.round+1}/12 · deck ${P(pl).deck.length}/12${draftDirHTML(D)}</div>
     ${draftPage(pack,D.picked[0],null,D.picked.length===1)}
-    <div class="center" style="margin-top:8px"><button class="primary dbtm" data-act="dconfirm" ${D.picked.length===1?'':'disabled'}>Valider ma carte</button></div>${pickedHTML(P(pl).deck)}</div>`;
+${pickedHTML(P(pl).deck)}</div>`;
 }
 function prepCard(pl,id){
   const key=S.prepId||'x';
@@ -3479,7 +3478,7 @@ function tourHTML(){
     if(UI.t4key!==D.round){UI.t4key=D.round;UI.dpick=null;}
     return `<div class="paper"><div class="dhead"><b>Draft à ${T.n||4}</b> · tour ${D.round+1}/12 · deck ${D.decks[TT.seat].length}/12</div>
       ${draftPage(pack,UI.dpick,'t4-'+D.round,!sent)}
-      <div class="center" style="margin-top:8px">${sent?'<button class="waitbtn" disabled>⏳ En attente de l’autre joueur…</button>':`<button class="primary dbtm" data-act="dconfirm" ${UI.dpick?'':'disabled'}>Valider ma carte</button>`}</div>
+      ${sent?'<div class="center" style="margin-top:8px"><button class="waitbtn" disabled>⏳ En attente de l’autre joueur…</button></div>':''}
       <p class="center muted" style="font-size:14px">Les paquets passent au joueur suivant quand les ${T.n||4} ont choisi.</p>${pickedHTML(D.decks[TT.seat])}</div>`;
   }
   if(T.phase==='build') return buildHTML('t4b-'+NET.code,tName(TT.seat));
@@ -4211,7 +4210,7 @@ if(window.matchMedia&&matchMedia('(hover: hover) and (pointer: fine)').matches){
     const z=e.target.closest&&e.target.closest('.zc[data-id]');
     if(z===HZ.src) return;
     hideHover();
-    if(!z||z.closest('.ovl')||z.closest('#hoverzoom')||z.closest('.fxcard')||(UI&&UI.tuto)) return;
+    if(!z||z.closest('.ovl')||z.closest('.dgrid')||z.closest('#hoverzoom')||z.closest('.fxcard')||(UI&&UI.tuto)) return;
     HZ.src=z; HZ.timer=setTimeout(()=>{ if(HZ.src===z&&document.body.contains(z)) showHover(z,lx,ly); },800);
   });
   document.addEventListener('mousedown',hideHover,true);
@@ -4345,7 +4344,7 @@ document.addEventListener('click',e=>{
       if(ai){ S.ai=true; S.aiStyle=style; S.aiLevel=($('#lvl')&&$('#lvl').value)||'normal'; S.handoff=null; if(S.stc) S.stc.ai=AILVL_LBL[S.aiLevel]; }
       save(); render(); return; }
     case 'ready': S.handoff=null; save(); render(); return;
-    case 'dpick': {if(TT.on&&!S){ if(UI.t4sent===TT.T.draft.round) return; const id=+t.dataset.id; UI.dpick=UI.dpick===id?null:id; render(); return;} if(NET.on){ if(UI.draftSent===`${S.game}-${S.draft.round}`) return; const id=+t.dataset.id; UI.dpick=UI.dpick===id?null:id; render(); return;} const D=S.draft,id=+t.dataset.id; D.picked=D.picked.includes(id)?[]:[id]; render(); return;}
+    case 'dpick': {if(TT.on&&!S){ if(UI.t4sent===TT.T.draft.round) return; const id=+t.dataset.id; UI.dpick=id; render(); return;} if(NET.on){ if(UI.draftSent===`${S.game}-${S.draft.round}`) return; const id=+t.dataset.id; UI.dpick=id; render(); return;} const D=S.draft,id=+t.dataset.id; D.picked=[id]; render(); return;}
     case 'dconfirm': { if(TT.on&&!S){ if(!UI.dpick) return; const r=TT.T.draft.round; UI.t4sent=r; if(TT.isHost) tourPick(TT.seat,r,UI.dpick); else TT.base.send({t:'dpick',round:r,id:UI.dpick}); render(); return; } if(NET.on){ if(!UI.dpick) return; UI.draftSent=`${S.game}-${S.draft.round}`; netAct({t:'draft',round:S.draft.round,id:UI.dpick}); render(); return; }
       const D=S.draft,pl=D.turn; D.picked.forEach(id=>stDraftPick(S.stc,pl,D.round+1,id,D.packs[pl])); P(pl).deck.push(...D.picked); D.packs[pl]=D.packs[pl].filter(x=>!D.picked.includes(x)); D.picked=[];
       if(pl===0){D.turn=1;S.handoff=1;}
