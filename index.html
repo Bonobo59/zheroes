@@ -1716,10 +1716,10 @@ function renderModal(){
     const free=!S&&!TT.on; if(free){ if(!m.set) m.set=SETNAME; if(m.set!==SETNAME) useSet(m.set); }
     const q=(m.q||'').toLowerCase();
     const list=DEFS.filter(c=>{ if(q&&!(c.name.toLowerCase().includes(q)||String(c.id)===q)) return false;
-      if(m.f==='Int') return c.inter; if(m.f) return c.type===m.f; return true; });
+      if(m.f==='Int') return c.inter; if(m.f&&m.f.startsWith('k:')) return catKeys(c.id).has(m.f.slice(2)); if(m.f) return c.type===m.f; return true; });
     body=`<div class="paper" style="max-width:900px"><div class="row" style="justify-content:space-between"><h2>Les ${DEFS.length} cartes</h2><button class="small" data-act="close">Fermer ✕</button></div>
 
-      <div class="row"><input id="q" placeholder="Nom ou numéro…" value="${esc(m.q||'')}"><select id="qf"><option value="">Toutes</option><option ${m.f==='Flash'?'selected':''} value="Flash">⚡ Flash</option><option ${m.f==='Mort'?'selected':''} value="Mort">💀 Mort</option><option value="Int" ${m.f==='Int'?'selected':''}>✏️ Dessin</option></select> <span class="muted">${list.length} carte(s)</span></div>
+      <div class="row"><input id="q" placeholder="Nom ou numéro…" value="${esc(m.q||'')}"><select id="qf">${CATF.map(g=>g[0]?`<optgroup label="${g[0]}">${g[1].map(o=>`<option value="${o[0]}" ${m.f===o[0]?'selected':''}>${o[1]}</option>`).join('')}</optgroup>`:g[1].map(o=>`<option value="${o[0]}" ${(m.f||'')===o[0]?'selected':''}>${o[1]}</option>`).join('')).join('')}</select> <span class="muted">${list.length} carte(s)</span></div>
       <div class="spacer"></div><div class="cat">${list.map(c=>`<div class="cardwrap" data-act="zoom" data-id="${c.id}">${cardHTML(null,c.id,{lazy:true})}</div>`).join('')}</div></div>`;
   } else if(m.type==='rules'){
     body=`<div class="paper" style="max-width:640px"><div class="row" style="justify-content:space-between"><h2>Résumé des règles</h2><button class="small" data-act="close">Fermer ✕</button></div>
@@ -3961,6 +3961,21 @@ function aiNeeds(){ // le deck manque-t-il de force ou de vie face à l'adversai
 }
 // cartes dont les effets dépendent des allégeances (lu dans le texte des effets)
 let AL_REF=null;
+// catégories du catalogue, lues dans le code des pouvoirs (FX) de chaque carte
+const CATF=[['',[['','Toutes les cartes']]],
+  ['Type',[['Flash','⚡ Flash'],['Mort','💀 Mort'],['Int','✏️ Dessin']]],
+  ['Effets',[['k:pv','⭐ Donne des PV (étoiles)'],['k:tok','💚 Ajoute des jetons vie'],['k:dgc','💥 Fait des DGC'],['k:cl','☑️ Fait cocher des allégeances']]],
+  ['Synergies',[['k:al','🔗 Synergie allégeance (toutes)'],['k:S','☀️ Synergie Soleil'],['k:L','🌙 Synergie Lune'],['k:E','✦ Synergie Étoile'],
+    ['k:SL','☀️🌙 Soleil + Lune'],['k:SE','☀️✦ Soleil + Étoile'],['k:EL','✦🌙 Étoile + Lune'],['k:SEL','☀️✦🌙 Les trois allégeances']]]];
+const CATK={};
+function catKeys(id){ if(CATK[SETNAME+id]) return CATK[SETNAME+id]; const f=FX[id]||{}; let src='';
+  Object.keys(f).forEach(k=>{ if(typeof f[k]==='function') src+=f[k].toString()+'\n'; });
+  const k=new Set(); if(/\bVP\(/.test(src)) k.add('pv'); if(/\bT\(/.test(src)) k.add('tok'); if(/\bDMG\(/.test(src)) k.add('dgc'); if(/\bCL\(/.test(src)) k.add('cl');
+  const L={S:0,E:0,L:0}; let m; const re=/\b(al|only)\([^()]*?,'([SEL])'\)/g; while((m=re.exec(src))) L[m[2]]=1;
+  const gen=/\b(share|alN|all3|al|only)\(/.test(src);
+  if(gen) k.add('al'); ['S','E','L'].forEach(a=>{ if(L[a]) k.add(a); });
+  if(L.S&&L.L) k.add('SL'); if(L.S&&L.E) k.add('SE'); if(L.E&&L.L) k.add('EL'); if((L.S&&L.E&&L.L)||/\ball3\b|KEYS\.every/.test(src)) k.add('SEL');
+  return CATK[SETNAME+id]=k; }
 function alRefs(){ if(AL_REF) return AL_REF; AL_REF={};
   Object.keys(FX).forEach(id=>{ const f=FX[id]; let src=''; ['c1','e1','c2','e2','draw'].forEach(k=>{ if(f&&f[k]) src+=f[k].toString(); });
     const r={S:0,E:0,L:0,any:0}; let m; const re=/\b(al|only)\([^()]*?,'([SEL])'\)/g; while((m=re.exec(src))) r[m[2]]++;
