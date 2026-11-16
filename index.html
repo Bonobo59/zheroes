@@ -1179,11 +1179,14 @@ function cleanupDeaths(){
   let again=true;
   while(again){
     again=false;
-    for(const pl of [0,1]){
-      const L=P(pl).line;
-      const i=L.findIndex(u=>u.rev&&u.tok<=0);
-      if(i>=0){ const face=P(1-pl).line[i]; destroyUnit(pl,i,'par un effet',face?face.id:null); again=true; break; }
-    }
+    // tous les héros tombés en même temps sortent d'abord de la ligne, puis leurs effets MORT (et dessins) se déclenchent :
+    // un héros qui meurt dans le même temps n'est donc plus compté « derrière moi »
+    const dead=[];
+    for(const pl of [0,1]) P(pl).line.forEach((u,i)=>{ if(u.rev&&u.tok<=0){ const f=P(1-pl).line[i]; dead.push({pl,i,face:f?f.id:null}); } });
+    if(!dead.length) break;
+    const evs=[];
+    for(const pl of [0,1]){ let off=0; dead.filter(d=>d.pl===pl).sort((a,b)=>a.i-b.i).forEach(d=>{ const e=destroyUnit(pl,d.i-off,'par un effet',d.face,true); off++; if(e) evs.push(e); }); }
+    evs.forEach(fireDeath); again=true;
   }
 }
 
