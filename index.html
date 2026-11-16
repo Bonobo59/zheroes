@@ -488,6 +488,7 @@ body.vsai .p2lbl{display:none}
 body:not(.mob) .draft4.dgrid{width:calc(var(--w4,760px)*.82);margin-left:calc(50% - var(--w4,760px)*.41)}
 body.mob .draft4.dgrid{grid-template-columns:repeat(2,1fr)!important;gap:4px 6px}
 body.mob .dvalid{font-size:19px;padding:.45em .9em}
+@media (max-width:700px),(pointer:coarse) and (max-width:1000px){.draft4.dgrid,body:not(.mob) .draft4.dgrid{grid-template-columns:repeat(2,1fr)!important;width:auto!important;margin-left:auto!important;margin-right:auto!important;max-width:760px}.dvalid{font-size:19px}}
 .dvalid:hover{transform:translate(-50%,-50%) scale(1.05)!important}.dvalid:active{transform:translate(-50%,-50%) scale(.97)!important}
 .dvalid{position:absolute;left:50%;top:27%;transform:translate(-50%,-50%);z-index:60;background:#2e8b57!important;color:#fff!important;border:3px solid #fff!important;font-size:clamp(14px,2.2vw,24px);font-weight:bold;padding:.45em .9em;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,.5);white-space:nowrap;animation:dcin .2s ease-out;cursor:pointer}
 @media (max-width:520px){.pickedgrid{grid-template-columns:repeat(4,1fr)}}
