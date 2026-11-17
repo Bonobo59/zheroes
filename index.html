@@ -409,14 +409,17 @@ body:has(.board) .wrap{padding:4px}
 .board{overflow:hidden}
 /* draft paging */
 .dhead{text-align:center;margin-bottom:6px}
-.phead{text-align:center;margin:2px 0 12px}
-.ph-banner{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff9ee;padding:5px 24px 7px;border-radius:6px 10px 7px 12px;transform:rotate(-1.2deg);box-shadow:3px 4px 0 rgba(0,0,0,.22)}
-.ph-banner h2{margin:0;font-family:'Permanent Marker',cursive;font-size:28px;color:#fff9ee;letter-spacing:.5px;line-height:1.15}
-.ph-ico{font-size:24px}
-.ph-sub{display:block;width:fit-content;max-width:min(560px,94%);margin:10px auto 0;background:#fff4b8;border:1.5px solid rgba(0,0,0,.12);padding:7px 16px;border-radius:3px;transform:rotate(.6deg);box-shadow:2px 3px 0 rgba(0,0,0,.12);font-size:17px;line-height:1.3}
-.ph-chips{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:10px}
-.ph-chip{background:#fffaf0;border:2px solid var(--ink);border-radius:999px;padding:2px 12px;font-size:15px;box-shadow:2px 2px 0 rgba(0,0,0,.25)}
-@media (max-width:640px){.ph-banner h2{font-size:22px}.ph-ico{font-size:20px}.ph-sub{font-size:15px}.ph-chip{font-size:13px}}
+.phead{position:relative;text-align:center;width:fit-content;min-width:min(420px,92%);max-width:min(680px,96%);margin:30px auto 16px;background:#fffaf0;border:3px solid var(--ink);border-radius:18px 14px 19px 13px;box-shadow:5px 6px 0 rgba(43,35,32,.9);padding:4px 22px 12px;transform:rotate(-.4deg)}
+.phead::before,.phead::after{content:'';position:absolute;top:-8px;width:70px;height:20px;background:rgba(245,197,66,.8);border:1px solid rgba(0,0,0,.08)}
+.phead::before{left:-22px;transform:rotate(-35deg)}.phead::after{right:-22px;transform:rotate(35deg)}
+.ph-banner{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff9ee;padding:5px 26px 8px;border-radius:6px 10px 7px 12px;transform:rotate(-1.5deg);box-shadow:3px 4px 0 rgba(0,0,0,.25);margin-top:-30px;position:relative;z-index:2}
+.ph-banner h2{margin:0;font-family:'Permanent Marker',cursive;font-size:30px;color:#fff9ee;letter-spacing:.5px;line-height:1.15}
+.ph-ico{font-size:26px}
+.ph-sub{margin:10px auto 0;font-size:19px;line-height:1.3;max-width:560px}
+.ph-sub b{background:linear-gradient(transparent 55%,rgba(245,197,66,.65) 55%);padding:0 2px}
+.ph-chips{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px;padding-top:10px;border-top:2px dashed rgba(43,35,32,.25)}
+.ph-chip{background:#f1ecfb;border:2px solid var(--ink);border-radius:999px;padding:2px 12px;font-size:15px;box-shadow:2px 2px 0 rgba(0,0,0,.3)}
+@media (max-width:640px){.phead{padding:4px 12px 10px;margin-top:26px}.ph-banner h2{font-size:23px}.ph-ico{font-size:20px}.ph-sub{font-size:16px}.ph-chip{font-size:13px;padding:1px 9px}}
 .dpager{display:flex;justify-content:center;align-items:center;gap:14px;margin:4px 0 8px}
 .parr{font-size:30px;line-height:1;padding:6px 26px;background:var(--red);color:#fff}
 .parr:disabled{background:#ccc}
