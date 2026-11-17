@@ -679,7 +679,8 @@ const esc = s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 const clone = o=>JSON.parse(JSON.stringify(o));
 const isInter = id=>DEF[id].inter;
-const imgSrc = (id,big)=>`${big?'cards':'thumbs'}${SETNAME==='test'&&TEST_IMG.has(+id)?'2':''}/${id}.webp`;
+const IMGH={"5": "7ee8f1", "43": "052c27", "67": "3eee60", "3": "4b9e9e", "37": "b505ed", "54": "5415ca", "109": "0a9c47", "46": "e2ade7", "108": "82deba", "95": "1dffec", "16": "00f690", "38": "56299a", "9": "9bb033", "41": "b78ecb", "21": "22446d", "84": "2dd56b", "26": "82aab2", "14": "e6b4e7", "50": "6cb415", "102": "1ab66b", "76": "2eb4c7", "104": "7f0dcf", "72": "23017b", "60": "169c96", "40": "28825a", "89": "e6359d", "79": "9730cd", "51": "532790", "29": "a4c2f8", "22": "500416", "70": "bd9bfe", "81": "3f5809", "27": "81e65a", "20": "c217b4", "6": "f5412f", "57": "426442", "45": "a593e1", "91": "f30c9d", "85": "2bf1a2", "32": "2e3a7e", "61": "c36c55", "106": "7eb120", "25": "ea32ba", "110": "4e478b", "94": "a76237", "53": "ecaf70", "100": "e4ccb3", "36": "1d1919", "63": "9a41e5", "90": "1c2206", "4": "71a7f7", "77": "fe7f0c", "82": "afd262", "96": "307db2", "78": "89ac5d", "30": "062ddf", "86": "980719", "64": "e67db3", "28": "cf4899", "13": "8ce67f", "69": "4dcf20", "107": "a49db5", "80": "28cd29", "101": "a742ad", "103": "a1d90f", "18": "1c663e", "59": "19b498", "65": "b6560b", "97": "264f6c", "31": "7e5139", "10": "a4c75f", "39": "8682b6", "92": "9a7e8f", "11": "14ccce", "62": "27d9af", "111": "0c37d4", "52": "c5a13c", "56": "f2fcc7", "2": "e2ba1f", "66": "d7ed90", "73": "b0a999", "23": "71febb", "15": "ae1e27"};
+const imgSrc = (id,big)=>{ const t=SETNAME==='test'&&TEST_IMG.has(+id); return `${big?'cards':'thumbs'}${t?'2':''}/${id}.webp${t&&IMGH[id]?'?v='+IMGH[id]:''}`; };
 
 function newCardState(id){
   const d=DEF[id];
