@@ -485,6 +485,8 @@ body.vsai .p2lbl{display:none}
 .pickedgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;max-width:760px;margin:0 auto}
 .draft4.dgrid{row-gap:4px;gap:4px 6px;grid-template-columns:repeat(4,1fr)!important}
 .dgrid .cardwrap{position:relative}
+.dgrid .dvalid{white-space:normal;width:max-content;max-width:86%;text-align:center;line-height:1.15}
+.dpnum{position:absolute;top:6px;right:6px;z-index:55;background:#c0392b;color:#fff;font-weight:bold;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;font-size:17px;box-shadow:0 2px 6px rgba(0,0,0,.4);pointer-events:none}
 body:not(.mob) .draft4.dgrid{width:calc(var(--w4,760px)*.82);margin-left:calc(50% - var(--w4,760px)*.41)}
 body.mob .draft4.dgrid{grid-template-columns:repeat(2,1fr)!important;gap:4px 6px}
 body.mob .dvalid{font-size:19px;padding:.45em .9em}
@@ -3535,13 +3537,9 @@ function dpHTML(key,kind,deck,title){
     body=`<div class="dp3">${D.sel.map(id=>`<div>${cardHTML(null,id,{cs:dpCardState(id),cls:'dpcard'})}</div>`).join('')}</div>`;
     act='<button class="waitbtn" disabled>⏳ En attente de l’autre joueur…</button>';
   } else if(D.step==='pick'){
-    const pages=Math.ceil(D.deck.length/4); D.page=Math.min(Math.max(0,D.page),pages-1);
-    const cur=D.deck.slice(D.page*4,D.page*4+4);
+    const last=D.sel.length===3?D.sel[2]:null;
     body=`<p class="center" style="margin:0 0 4px">Choisis les <b>3 héros</b> à améliorer (${D.sel.length}/3).</p>
-      <div class="dpager"><button class="parr" data-act="dppage" data-d="-1" ${D.page>0?'':'disabled'}>◀</button><span class="pinfo">${D.page+1} / ${pages}</span><button class="parr" data-act="dppage" data-d="1" ${D.page<pages-1?'':'disabled'}>▶</button></div>
-      <div class="draft4">${D.sel.length===3&&MOB()?'<div class="dcwrap"><button class="dcenter" data-act="dpnext">✔ Valider</button></div>':''}${cur.map(id=>`<div class="handcard"><div class="cardwrap" data-act="dpsel" data-id="${id}">${cardHTML(null,id,{cls:D.sel.includes(id)?'sel':''})}</div>
-        <div class="lbl">${D.sel.includes(id)?'<b>✓ '+(D.sel.indexOf(id)+1)+'</b>':''}</div></div>`).join('')}</div>`;
-    act=MOB()?'':`<button class="primary" data-act="dpnext" ${D.sel.length===3?'':'disabled'}>Valider ces 3 héros</button>`;
+      <div class="draft4 dgrid">${D.deck.map(id=>`<div class="handcard"><div class="cardwrap" data-act="dpsel" data-id="${id}">${cardHTML(null,id,{cls:D.sel.includes(id)?'sel':''})}${D.sel.includes(id)?`<span class="dpnum">${D.sel.indexOf(id)+1}</span>`:''}${last===id?'<button class="dvalid" data-act="dpnext">Valider ces 3 cartes ?</button>':''}</div></div>`).join('')}</div>`;
   } else {
     const used=Object.values(D.al);
     body=`${D.step==='anim'?'<p class="center" style="margin:0 0 4px">Tes 3 héros reçoivent +1 ATK, +1 ♥ et leur pouvoir I…</p>':''}
@@ -4294,7 +4292,7 @@ document.addEventListener('click',e=>{
     case 'stclear': if(UI.stArm){ statsWrite([]); UI.stArm=false; toast('Statistiques effacées.'); render(); } else { UI.stArm=true; toast('Clique encore une fois sur « Effacer les statistiques » pour confirmer.'); } return;
     case 'sturl': { const v=($('#sturl')||{}).value||''; try{ if(v.trim()) localStorage.setItem('zheroes_sheet_url',v.trim()); else localStorage.removeItem('zheroes_sheet_url'); }catch(e){} statsSendPending(); toast(v.trim()?'Adresse enregistrée : les campagnes seront envoyées au Google Sheet.':'Envoi désactivé.'); render(); return; }
     case 'dpal': dpClickAl(+t.dataset.id,t.dataset.key); return;
-    case 'dpsel': { const D=UI.dp; if(!D||D.step!=='pick') return; const id=+t.dataset.id; if(D.sel.includes(id)) D.sel=D.sel.filter(x=>x!==id); else if(D.sel.length<3) D.sel.push(id); render(); return; }
+    case 'dpsel': { const D=UI.dp; if(!D||D.step!=='pick') return; const id=+t.dataset.id; if(D.sel.includes(id)) D.sel=D.sel.filter(x=>x!==id); else { if(D.sel.length>=3) D.sel.pop(); D.sel.push(id); } render(); return; }
     case 'dppage': if(UI.dp){ UI.dp.page+=+t.dataset.d; render(); } return;
     case 'dpnext': if(UI.dp&&UI.dp.sel.length===3){ UI.dp.step='anim'; UI.dp.animStarted=false; UI.dp.animDone={}; render(); scrollTop0(); } return;
     case 'dpback': dpBack(); return;
