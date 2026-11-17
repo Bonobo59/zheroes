@@ -123,12 +123,11 @@ button.act:disabled{animation:none}
 .dvstats table td:not(:first-child){text-align:center!important;white-space:nowrap}
 .dvhead td{font-family:'Permanent Marker';font-size:15px;border-bottom:2px solid var(--ink)!important}
 /* ---- écrans de score ---- */
-.scorecard{position:relative;max-width:780px;margin:22px auto 14px;padding:24px 16px 16px;text-align:center;border:3px solid var(--ink);border-radius:14px 20px 12px 18px;box-shadow:6px 7px 0 rgba(0,0,0,.35);
-  background:#fffaf0;background-image:radial-gradient(rgba(60,40,20,.05) 1px,transparent 1.2px),repeating-linear-gradient(transparent 0 27px,#e6d8bf 27px 28px);background-size:7px 7px,auto;transform:rotate(-.25deg)}
-.scorecard::before,.scorecard::after{content:'';position:absolute;top:-13px;width:96px;height:26px;border:1px solid rgba(0,0,0,.08);box-shadow:0 1px 2px rgba(0,0,0,.15)}
-.scorecard::before{left:26px;background:rgba(232,146,44,.6);transform:rotate(-7deg)}
-.scorecard::after{right:26px;background:rgba(107,91,181,.5);transform:rotate(6deg)}
-.sc-kicker{font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.scorecard{position:relative;max-width:780px;margin:42px auto 14px;padding:4px 16px 16px;text-align:center;background:#fffaf0;border:3px solid var(--ink);border-radius:18px 14px 19px 13px;box-shadow:5px 6px 0 rgba(43,35,32,.9);transform:rotate(-.3deg)}
+.scorecard::before,.scorecard::after{content:'';position:absolute;top:-8px;width:76px;height:21px;background:rgba(245,197,66,.8);border:1px solid rgba(0,0,0,.08)}
+.scorecard::before{left:-22px;transform:rotate(-35deg)}
+.scorecard::after{right:-22px;transform:rotate(35deg)}
+.sc-kicker{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff9ee;font-family:'Permanent Marker',cursive;font-size:clamp(20px,3.6vw,28px);line-height:1.2;padding:5px 26px 8px;border-radius:6px 10px 7px 12px;transform:rotate(-1.5deg);box-shadow:3px 4px 0 rgba(0,0,0,.25);margin:-32px 0 12px;position:relative;z-index:2}
 .sc-title{font-family:'Permanent Marker';font-size:clamp(22px,4.6vw,36px);line-height:1.25;background:linear-gradient(transparent 52%,#ffe27a 52% 88%,transparent 88%);padding:0 8px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .sc-head{margin-bottom:6px}
 .sc-next{margin:8px 0 2px}
@@ -157,7 +156,7 @@ button.act:disabled{animation:none}
 .stbl tr.me td:nth-child(2){font-family:'Permanent Marker';letter-spacing:.3px}
 .stbl tr.me + tr td{border-top:none}
 @keyframes mepulse{50%{filter:brightness(1.12)}}
-body.mob .scorecard{padding:20px 8px 12px;margin-top:18px}
+body.mob .scorecard{padding:4px 8px 12px;margin-top:38px}
 body.mob .sc-plates{gap:5px}
 body.mob .sc-plate .big{font-size:30px} body.mob .sc-plate .big img{height:26px}
 body.mob .sc-plate .nm{font-size:15px} body.mob .sc-plate .sub{font-size:12px}
@@ -1658,7 +1657,7 @@ function plateHTML(p,i,big,sub,win,pts){ return `<div class="sc-plate p${i} ${wi
   <div class="big">${big}${pts?'<span class="pts">pts</span>':'<img src="star.webp" alt="">'}</div>${pts?'<div class="ptsl">de classement</div>':''}<div class="sub">${sub}</div></div>`; }
 function endHTML(){
   if(TT.on&&S.tour){ const r=S.results[S.results.length-1]; const wv=r.vp[0]>r.vp[1]?0:r.vp[1]>r.vp[0]?1:-1;
-    return `<div class="scorecard"><div class="sc-head"><span class="sc-title">${r.winner?esc(r.winner)+' gagne ce duel':'Égalité'}</span><div class="muted">Partie ${S.game}/6 · Table ${S.tour.table}</div></div>
+    return `<div class="scorecard"><div class="sc-head"><div class="sc-kicker">Fin du duel</div><br><span class="sc-title">${r.winner?esc(r.winner)+' gagne ce duel':'Égalité'}</span><div class="muted">Partie ${S.game}/6 · Table ${S.tour.table}</div></div>
       <div class="sc-plates">${S.players.map((p,i)=>plateHTML(p,i,r.vp[i],'étoiles cette partie',wv===i)).join('<div class="sc-vs">VS</div>')}</div>
       <p class="muted">${TT.solo?'Classement dans un instant…':'Le classement s’affichera quand l’autre table aura terminé.'}</p></div>`; }
   const [a,b]=S.players; const last=S.results[S.results.length-1]; const st=[0,1].map(i=>S.results.reduce((s,r)=>s+r.vp[i],0));
@@ -1670,14 +1669,14 @@ function endHTML(){
   if(end){
     const ff=S.forfeit!=null?S.forfeit:null;
     const wi=ff!=null?1-ff:a.pc>b.pc?0:b.pc>a.pc?1:st[0]>st[1]?0:st[1]>st[0]?1:-1, w=wi>=0?S.players[wi].name:null; const tb=ff==null&&a.pc===b.pc&&w;
-    return `<div class="scorecard final"><div class="sc-head"><div class="sc-kicker">Fin de la campagne</div><span class="sc-title">${w?'🏆 '+esc(w)+' remporte la campagne !':'Égalité parfaite !'}</span>
+    return `<div class="scorecard final"><div class="sc-head"><div class="sc-kicker">🏁 Fin de la campagne</div><br><span class="sc-title">${w?'🏆 '+esc(w)+' remporte la campagne !':'Égalité parfaite !'}</span>
       ${tb?'<p class="muted">Égalité aux points de classement : départagé au nombre total d’étoiles.</p>':''}${ff!=null?`<p class="muted">🏳️ ${esc(S.players[ff].name)} a abandonné la partie.</p>`:''}</div>
       <div class="sc-plates">${S.players.map((p,i)=>plateHTML(p,i,p.pc,`${st[i]} ⭐ gagnées au total`,wi===i,true)).join('<div class="sc-vs">VS</div>')}</div>
       ${tbl}<div class="spacer"></div><button class="primary" data-act="${NET.on?'nhome':'endmenu'}">${NET.on?'Retour au menu principal':'Nouvelle campagne'}</button></div>
     <div class="paper center dvpaper">${deckViewHTML(S.players.map((p,i)=>({name:p.name,cs:p.cs,me:i===ME(),trk:p.trk,trkM:p.trkM})),wi>=0?wi:null)}</div>`;
   }
   const lw=last.vp[0]>last.vp[1]?0:last.vp[1]>last.vp[0]?1:-1;
-  return `<div class="scorecard"><div class="sc-head"><div class="sc-kicker">Fin de la partie ${last.game}/6</div><span class="sc-title">${last.winner?esc(last.winner)+' gagne la partie !':'Égalité !'}</span><div class="sc-next">${isGuest()&&!AS.on?'<b>L’hôte lance la partie suivante…</b>':`<button class="primary" data-act="nextgame">Lancer la partie ${S.game+1}</button>`}</div></div>
+  return `<div class="scorecard"><div class="sc-head"><div class="sc-kicker">🏁 Fin de la partie ${last.game}/6</div><br><span class="sc-title">${last.winner?esc(last.winner)+' gagne la partie !':'Égalité !'}</span><div class="sc-next">${isGuest()&&!AS.on?'<b>L’hôte lance la partie suivante…</b>':`<button class="primary" data-act="nextgame">Lancer la partie ${S.game+1}</button>`}</div></div>
     <div class="sc-plates">${S.players.map((p,i)=>plateHTML(p,i,last.vp[i],`<b>${p.pc} pts de classement</b> · ${st[i]} ⭐ au total`,lw===i)).join('<div class="sc-vs">VS</div>')}</div>
     ${tbl}
     ${cocheGameHTML(last.game)}
@@ -3516,19 +3515,19 @@ function tourHTML(){
   if(T.phase==='prep') return tourPrepHTML();
   if(T.phase==='standings'){
     const left=Math.max(0,Math.ceil((T.startAt-Date.now())/1000));
-    return `<div class="paper" style="margin-top:10px">${lost}<h2>${T.round===0?'🏆 Le tournoi commence !':'Classement après la partie '+T.round}</h2>
+    return `${lost}<div class="scorecard"><div class="sc-head"><div class="sc-kicker">${T.round===0?'🏆 Le tournoi commence !':'🏆 Classement après la partie '+T.round}</div></div>
       <div class="center" style="margin:4px 0 10px">${TT.isHost?`<button class="primary" data-act="t4go">Lancer la partie ${T.round+1}</button> `:''}<span class="muted">Début dans <b>${left}</b> s</span></div>
       ${T.round>0?tourTable():''}
       <h3 style="margin-top:14px">Partie ${T.round+1}/6 — prochains duels</h3>${duelsHTML(T.round)}</div>`;
   }
   if(T.phase==='play'){
     const mine=tPairs(T.round).findIndex(p=>p.includes(TT.seat)), fin=AT.on&&mine>=0&&T.done&&T.done[mine];
-    return `<div class="paper center" style="margin-top:10px">${lost}<h2>Partie ${T.round+1}/6</h2>${duelsHTML(T.round)}<p class="muted">${fin?'Ton duel est terminé : la suite dès que les autres tables auront fini.':'Préparation du duel…'}</p>${AT.on?`${T.round>0||fin?tourTable():''}<div class="center" style="margin-top:8px"><button data-act="nleave">Retour au lobby</button></div>`:''}</div>`;
+    return `${lost}<div class="scorecard"><div class="sc-head"><div class="sc-kicker">⚔️ Partie ${T.round+1}/6</div></div>${duelsHTML(T.round)}<p class="muted">${fin?'Ton duel est terminé : la suite dès que les autres tables auront fini.':'Préparation du duel…'}</p>${AT.on?`${T.round>0||fin?tourTable():''}<div class="center" style="margin-top:8px"><button data-act="nleave">Retour au lobby</button></div>`:''}</div>`;
   }
   if(T.phase==='end'){
     const r=tourRanking(); const w=r[0];
     const dk=tSeats().filter(s=>T.pdata[s]&&T.pdata[s].cs);
-    return `<div class="scorecard final"><div class="sc-head"><div class="sc-kicker">Fin du tournoi</div><span class="sc-title">🏆 ${esc(tName(w))} remporte le tournoi !</span>${T.ffEnd?`<p class="muted">🏳️ ${Object.keys(T.quit||{}).map(s=>esc(tName(+s))).join(', ')} a abandonné.</p>`:''}</div>${tourTable()}
+    return `<div class="scorecard final"><div class="sc-head"><div class="sc-kicker">🏁 Fin du tournoi</div><br><span class="sc-title">🏆 ${esc(tName(w))} remporte le tournoi !</span>${T.ffEnd?`<p class="muted">🏳️ ${Object.keys(T.quit||{}).map(s=>esc(tName(+s))).join(', ')} a abandonné.</p>`:''}</div>${tourTable()}
       <div class="spacer"></div><button class="primary" data-act="nhome">Retour au menu principal</button></div>
       <div class="paper center dvpaper">${deckViewHTML(dk.map(s=>({name:tName(s),cs:T.pdata[s].cs,me:s===TT.seat,trk:T.pdata[s].trk,trkM:T.pdata[s].trkM})),dk.indexOf(w)>=0?dk.indexOf(w):null)}</div>`;
   }
