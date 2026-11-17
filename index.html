@@ -1801,7 +1801,7 @@ function drawWatch(){
 function drawBusy(){ return DQ.run||DQ.q.length>0; }
 async function drawWait(){ for(let w=0;drawBusy()&&w<200;w++) await sleep(60); }
 async function runDrawQ(){ DQ.run=true; document.body.classList.add('drawing');
-  try{ while(DQ.q.length){ for(let w=0;UI.deathBusy&&w<120;w++) await sleep(50); const j=DQ.q.shift(); const c=cardEl(j.pl,j.id); const dot=c&&c.querySelector(`[data-dk="draw${j.i}"]`); if(!dot) continue; await pencilPop(dot); } }
+  try{ while(DQ.q.length){ for(let w=0;UI.deathBusy&&w<120;w++) await sleep(50); const j=DQ.q.shift(); const c=cardEl(j.pl,j.id); const dot=c&&c.querySelector(`[data-dk="draw${j.i}"]`); if(!dot) continue; await Promise.race([pencilPop(dot),sleep(2500)]); } }
   finally{ DQ.run=false; document.body.classList.remove('drawing'); if(S) render(); } }
 function pencilPop(dot){
   const r=dot.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
@@ -1921,6 +1921,22 @@ function autoCombatStart(){
   setTimeout(()=>{ if(S&&S.phase==='reveal'&&S.step>=4&&rkey()===key&&!UI.anim&&!UI.auto&&!drawBusy()&&!S.pending.some(fires)&&!(UI.tuto)){ startCombat(); render(); if(NET.on) netSyncSoon(); fightAnimated(true); } else { UI.acKey=null; if(S&&S.phase==='reveal') setTimeout(autoCombatStart,400); } },900);
 }
 function g6Next(){ autoCoche(); }
+/* Filet de sécurité : si la révélation ou le combat n'avance plus (animation interrompue, appli mise en arrière-plan…),
+   on remet les drapeaux d'animation à zéro et on relance la suite automatique. */
+const WD={sig:'',t:0};
+function wdSig(){ return [S.phase,S.step,S.manche,S.game,(S.pending||[]).length,(S.armed||[]).join(','),S.combatDone?1:0,S.players.map(p=>p.line.map(u=>u.id+':'+u.tok+':'+(u.rev?1:0)).join('.')).join('|'),(S.log||[]).length].join('/'); }
+function wdTick(){
+  if(!S||UI.tuto||isGuest()||(NET.on&&!NET.host)||!(S.phase==='reveal'||S.phase==='combat')||document.hidden){ WD.sig=''; return; }
+  const sg=wdSig(), now=Date.now();
+  if(sg!==WD.sig){ WD.sig=sg; WD.t=now; return; }
+  if(now-WD.t<9000) return;
+  WD.t=now; console.warn('Zheroes : partie bloquée, relance automatique');
+  DQ.q=[]; DQ.run=false; UI.anim=false; UI.auto=false; UI.deathBusy=false; UI.acKey=null; UI.arT=null; UI.arW=null; S.armed=[];
+  document.body.classList.remove('animating','drawing');
+  render(); autoResolveSoon(); continueAuto();
+}
+setInterval(wdTick,1500);
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ WD.sig=''; } });
 function g6NextOld(){
   if(!S||isGuest()||S.phase!=='combat'||!S.combatDone||S.game<6) return; const key=rkey();
   if(UI.g6===key) return; UI.g6=key;
