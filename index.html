@@ -1624,7 +1624,7 @@ function cocheTop(C){
 function cocheMob(C,p){
   const ids=mancheCards(C.pl), k=rkey()+'-'+C.pl; if(UI.ciKey!==k){UI.ciKey=k;UI.ci=0;} UI.ci=Math.min(Math.max(0,UI.ci||0),ids.length-1);
   const id=ids[UI.ci];
-  return `<div class="paper">${phHead('✏️','Coche')}
+  return `<div class="paper">
    ${cocheTop(C)}
    <div class="cthumbs">${ids.map((x,i)=>`<div class="cth ${i===UI.ci?'on':''}" data-act="cpick" data-i="${i}">${cardHTML(C.pl,x,{})}</div>`).join('')}</div>
    <div class="ccar"><button class="parr" data-act="cprev">◀</button><div class="ccard">${cardHTML(C.pl,id,{ia:C.left>0&&!C.done,coche:true,big:true})}</div><button class="parr" data-act="cfwd">▶</button></div>
