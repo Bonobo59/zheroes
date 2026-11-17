@@ -410,6 +410,9 @@ body:has(.board) .wrap{padding:4px}
 /* draft paging */
 .dhead{text-align:center;margin-bottom:6px}
 .phead{position:relative;text-align:center;width:fit-content;min-width:min(420px,92%);max-width:min(680px,96%);margin:30px auto 16px;background:#fffaf0;border:3px solid var(--ink);border-radius:18px 14px 19px 13px;box-shadow:5px 6px 0 rgba(43,35,32,.9);padding:4px 22px 12px;transform:rotate(-.4deg)}
+.phead.bare{background:none;border:0;box-shadow:none;padding:0;min-width:0;margin:6px auto 12px;transform:none}
+.phead.bare::before,.phead.bare::after{display:none}
+.phead.bare .ph-banner{margin-top:0}
 .phead::before,.phead::after{content:'';position:absolute;top:-8px;width:70px;height:20px;background:rgba(245,197,66,.8);border:1px solid rgba(0,0,0,.08)}
 .phead::before{left:-22px;transform:rotate(-35deg)}.phead::after{right:-22px;transform:rotate(35deg)}
 .ph-banner{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff9ee;padding:5px 26px 8px;border-radius:6px 10px 7px 12px;transform:rotate(-1.5deg);box-shadow:3px 4px 0 rgba(0,0,0,.25);margin-top:-30px;position:relative;z-index:2}
@@ -1463,6 +1466,7 @@ function draftPage(pack,selId,key,ok){ // toutes les cartes du paquet en grille 
 }
 function phHead(ico,title,sub,chips,extra){ // en-tête commun des phases : bandeau titre + consigne + infos
   chips=(chips||[]).filter(Boolean);
+  if(!sub&&!chips.length&&!extra) return `<div class="phead bare"><div class="ph-banner"><span class="ph-ico">${ico}</span><h2>${title}</h2></div></div>`;
   return `<div class="phead"><div class="ph-banner"><span class="ph-ico">${ico}</span><h2>${title}</h2></div>
     ${sub?`<div class="ph-sub">${sub}</div>`:''}${chips.length||extra?`<div class="ph-chips">${chips.map(c=>`<span class="ph-chip">${c}</span>`).join('')}${extra||''}</div>`:''}</div>`;
 }
@@ -1471,10 +1475,10 @@ function pickedHTML(ids){ if(!ids||!ids.length) return ''; return `${MOB()?'<hr 
 function draftHTML(){
   const D=S.draft, pl=NET.on?NET.me:D.turn, pack=D.packs[pl];
   if(NET.on){ const sent=UI.draftSent===`${S.game}-${D.round}`; if(UI.dKey!==`${S.game}-${D.round}`){UI.dKey=`${S.game}-${D.round}`;UI.dpick=null;}
-    return `<div class="paper">${phHead('🃏','Draft','Choisis <b>1 héros</b> dans le paquet, puis touche « Valider ? ».',[`Tour <b>${D.round+1}</b>/12`,`Deck <b>${P(pl).deck.length}</b>/12`,dirChip(D)])}
+    return `<div class="paper">${phHead('🃏','Draft','Choisis une carte.',[`Tour <b>${D.round+1}</b>/12`,`Deck <b>${P(pl).deck.length}</b>/12`,dirChip(D)])}
     ${draftPage(pack,UI.dpick,null,!sent)}
     ${sent?'<div class="center" style="margin-top:8px"><button class="waitbtn" disabled>⏳ En attente de l’autre joueur…</button></div>':''}${pickedHTML(P(pl).deck)}</div>`; }
-  return `<div class="paper">${phHead('🃏','Draft','Choisis <b>1 héros</b> dans le paquet, puis touche « Valider ? ».',[esc(P(pl).name),`Tour <b>${D.round+1}</b>/12`,`Deck <b>${P(pl).deck.length}</b>/12`,dirChip(D)])}
+  return `<div class="paper">${phHead('🃏','Draft','Choisis une carte.',[esc(P(pl).name),`Tour <b>${D.round+1}</b>/12`,`Deck <b>${P(pl).deck.length}</b>/12`,dirChip(D)])}
     ${draftPage(pack,D.picked[0],null,D.picked.length===1)}
 ${pickedHTML(P(pl).deck)}</div>`;
 }
@@ -1549,7 +1553,7 @@ function placeHTML(){
   const slots=[0,1,2,3].map(k=>{const id=arr[k];return `<div class="slot ${k===0?'front':''}">${id?`<div data-act="unplace" data-k="${k}" style="position:absolute;inset:0">${cardHTML(pl,id,{})}</div>`:`<span class="num">${k+1}</span>`}</div>`;}).join('');
   const hand=p.hand.filter(id=>!arr.includes(id));
   const o=P(1-pl), vb=v=>`<span class="vpbox ps"><img src="star.webp" alt="étoiles"><b>${v}</b></span>`;
-  return `<div class="paper">${phHead('📍','Positionnement','Place tes <b>4 héros</b> : le <b>1</b> combat en premier.',[],`<div class="pscore"><span class="pn">${esc(p.name)}</span>${vb(p.vp)}<span class="pvs">–</span>${vb(o.vp)}<span class="pn">${esc(o.name)}</span></div>`)}
+  return `<div class="paper">${phHead('📍','Positionnement')}<div class="pscore" style="margin-bottom:8px"><span class="pn">${esc(p.name)}</span>${vb(p.vp)}<span class="pvs">–</span>${vb(o.vp)}<span class="pn">${esc(o.name)}</span></div>
     <div class="mid"><div>${numTile(1)}</div><div>${numTile(2)}</div><div>${numTile(3)}</div><div>${numTile(4)}</div></div>
     <div class="side">${slots}</div>
     <div class="spacer"></div><div class="center">${sent?'<button class="waitbtn" disabled>⏳ En attente de l’autre joueur…</button>':`<button data-act="preset" ${arr.length?'':'disabled'}>↺ Recommencer</button> <button class="primary" data-act="pconfirm" ${arr.length===4?'':'disabled'}>Valider le placement</button>`}</div>
@@ -1621,7 +1625,7 @@ function cocheTop(C){
 function cocheMob(C,p){
   const ids=mancheCards(C.pl), k=rkey()+'-'+C.pl; if(UI.ciKey!==k){UI.ciKey=k;UI.ci=0;} UI.ci=Math.min(Math.max(0,UI.ci||0),ids.length-1);
   const id=ids[UI.ci];
-  return `<div class="paper">${phHead('✏️','Coche','Répartis tes coches sur tes héros.',[esc(p.name)])}
+  return `<div class="paper">${phHead('✏️','Coche')}
    ${cocheTop(C)}
    <div class="cthumbs">${ids.map((x,i)=>`<div class="cth ${i===UI.ci?'on':''}" data-act="cpick" data-i="${i}">${cardHTML(C.pl,x,{})}</div>`).join('')}</div>
    <div class="ccar"><button class="parr" data-act="cprev">◀</button><div class="ccard">${cardHTML(C.pl,id,{ia:C.left>0&&!C.done,coche:true,big:true})}</div><button class="parr" data-act="cfwd">▶</button></div>
@@ -1633,7 +1637,7 @@ function cocheMob(C,p){
 function cocheHTML(){
   const C=CO(),p=P(C.pl);
   if(MOB()) return cocheMob(C,p);
-  return `<div class="paper">${phHead('✏️','Coche','Répartis tes coches sur tes héros : ATK, VIE, pouvoirs ou allégeances.',[esc(p.name)])}
+  return `<div class="paper">${phHead('✏️','Coche')}
    ${cocheTop(C)}
    <div class="row" style="justify-content:center;margin:8px 0"><button data-act="cundo" ${C.hist.length?'':'disabled'}>↶ Annuler</button>
 </div>
@@ -3501,7 +3505,7 @@ function tourHTML(){
   if(T.phase==='draft'){
     const D=T.draft, pack=D.packs[TT.seat], sent=UI.t4sent===D.round;
     if(UI.t4key!==D.round){UI.t4key=D.round;UI.dpick=null;}
-    return `<div class="paper">${phHead('🃏',`Draft à ${T.n||4}`,'Choisis <b>1 héros</b> dans le paquet, puis touche « Valider ? ».',[`Tour <b>${D.round+1}</b>/12`,`Deck <b>${D.decks[TT.seat].length}</b>/12`])}
+    return `<div class="paper">${phHead('🃏',`Draft à ${T.n||4}`,'Choisis une carte.',[`Tour <b>${D.round+1}</b>/12`,`Deck <b>${D.decks[TT.seat].length}</b>/12`])}
       ${draftPage(pack,UI.dpick,'t4-'+D.round,!sent)}
       ${sent?'<div class="center" style="margin-top:8px"><button class="waitbtn" disabled>⏳ En attente de l’autre joueur…</button></div>':''}
       <p class="center muted" style="font-size:14px">Les paquets passent au joueur suivant quand les ${T.n||4} ont choisi.</p>${pickedHTML(D.decks[TT.seat])}</div>`;
