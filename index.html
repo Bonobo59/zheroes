@@ -82,6 +82,14 @@ input,select{font-family:inherit;font-size:17px;padding:4px 8px;border:2px solid
 .grid2{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .cat{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+body:not(.mob) .catpaper{max-width:1100px!important}
+body:not(.mob) .catpaper .cat{grid-template-columns:repeat(4,1fr);gap:14px}
+@media (max-width:700px){body:not(.mob) .catpaper .cat{grid-template-columns:repeat(2,1fr)}}
+.zoomnav{display:flex;align-items:center;justify-content:center;gap:12px}
+.znav{flex:0 0 auto;width:56px;height:56px;border-radius:50%!important;background:#d63b2f!important;color:#fff!important;border:3px solid var(--ink)!important;font-size:24px!important;padding:0!important;display:flex;align-items:center;justify-content:center;box-shadow:3px 3px 0 rgba(0,0,0,.35);cursor:pointer}
+.znav:hover{background:#b72e24!important}
+body.mob .znav{width:44px;height:44px;font-size:19px!important}
+body.mob .zoomnav{gap:6px}
 @media (min-width:640px){.grid2.hand4{grid-template-columns:repeat(4,1fr)}}
 .handcard{position:relative}
 .handcard .lbl{text-align:center;font-size:14px;margin-top:2px}
@@ -1738,14 +1746,16 @@ function renderModal(){
     body=`<div class="paper" style="max-width:640px"><div class="row" style="justify-content:space-between"><h3>Zone KO — ${esc(p.name)}</h3><button class="small" data-act="close">Fermer ✕</button></div>
       <div class="cat">${p.ko.map(id=>`<div class="cardwrap" data-act="open" data-pl="${m.pl}" data-id="${id}">${cardHTML(m.pl,id,{})}</div>`).join('')}</div></div>`;
   } else if(m.type==='zoom'){
-    body=`<div class="paper"><div class="row" style="justify-content:flex-end"><button class="small" data-act="close">Fermer ✕</button></div>
-      <div style="max-width:380px;margin:0 auto">${cardHTML(m.pl??null,m.id,{big:true})}</div></div>`;
+    const L=m.back&&m.back.type==='cat'?catList(m.back).map(c=>c.id):null, k=L?L.indexOf(m.id):-1;
+    const nav=L&&L.length>1&&k>=0;
+    body=`<div class="paper"><div class="row" style="justify-content:space-between">${nav?`<span class="muted">${k+1} / ${L.length}</span>`:'<span></span>'}<button class="small" data-act="close">Fermer ✕</button></div>
+      <div class="zoomnav">${nav?`<button class="znav" data-act="znav" data-d="-1" aria-label="Carte précédente">◀</button>`:''}
+      <div style="max-width:380px;width:100%;margin:0 auto">${cardHTML(m.pl??null,m.id,{big:true})}</div>
+      ${nav?`<button class="znav" data-act="znav" data-d="1" aria-label="Carte suivante">▶</button>`:''}</div></div>`;
   } else if(m.type==='cat'){
     const free=!S&&!TT.on; if(free){ if(!m.set) m.set=SETNAME; if(m.set!==SETNAME) useSet(m.set); }
-    const q=(m.q||'').toLowerCase();
-    const list=DEFS.filter(c=>{ if(q&&!(c.name.toLowerCase().includes(q)||String(c.id)===q)) return false;
-      if(m.f==='Int') return c.inter; if(m.f&&m.f.startsWith('k:')) return catKeys(c.id).has(m.f.slice(2)); if(m.f) return c.type===m.f; return true; });
-    body=`<div class="paper" style="max-width:900px"><div class="row" style="justify-content:space-between"><h2>Les ${DEFS.length} cartes</h2><button class="small" data-act="close">Fermer ✕</button></div>
+    const list=catList(m);
+    body=`<div class="paper catpaper" style="max-width:900px"><div class="row" style="justify-content:space-between"><h2>Les ${DEFS.length} cartes</h2><button class="small" data-act="close">Fermer ✕</button></div>
 
       <div class="row"><input id="q" placeholder="Nom ou numéro…" value="${esc(m.q||'')}"><select id="qf">${CATF.map(g=>g[0]?`<optgroup label="${g[0]}">${g[1].map(o=>`<option value="${o[0]}" ${m.f===o[0]?'selected':''}>${o[1]}</option>`).join('')}</optgroup>`:g[1].map(o=>`<option value="${o[0]}" ${(m.f||'')===o[0]?'selected':''}>${o[1]}</option>`).join('')).join('')}</select> <span class="muted">${list.length} carte(s)</span></div>
       <div class="spacer"></div><div class="cat">${list.map(c=>`<div class="cardwrap" data-act="zoom" data-id="${c.id}">${cardHTML(null,c.id,{lazy:true})}</div>`).join('')}</div></div>`;
@@ -4015,6 +4025,12 @@ function catKeys(id){ if(CATK[SETNAME+id]) return CATK[SETNAME+id]; const f=FX[i
   if(gen) k.add('al'); ['S','E','L'].forEach(a=>{ if(L[a]) k.add(a); });
   if(L.S&&L.L) k.add('SL'); if(L.S&&L.E) k.add('SE'); if(L.E&&L.L) k.add('EL'); if((L.S&&L.E&&L.L)||/\ball3\b|KEYS\.every/.test(src)) k.add('SEL');
   return CATK[SETNAME+id]=k; }
+function catList(m){ const q=(m.q||'').toLowerCase();
+  return DEFS.filter(c=>{ if(q&&!(c.name.toLowerCase().includes(q)||String(c.id)===q)) return false;
+    if(m.f==='Int') return c.inter; if(m.f&&m.f.startsWith('k:')) return catKeys(c.id).has(m.f.slice(2)); if(m.f) return c.type===m.f; return true; }); }
+function zoomStep(d){ const m=UI.modal; if(!m||m.type!=='zoom'||!m.back||m.back.type!=='cat') return;
+  const L=catList(m.back).map(c=>c.id), k=L.indexOf(m.id); if(k<0||L.length<2) return; m.id=L[(k+d+L.length)%L.length]; renderModal(); }
+document.addEventListener('keydown',e=>{ if(UI.modal&&UI.modal.type==='zoom'&&(e.key==='ArrowLeft'||e.key==='ArrowRight')){ e.preventDefault(); zoomStep(e.key==='ArrowLeft'?-1:1); } });
 function alRefs(){ if(AL_REF) return AL_REF; AL_REF={};
   Object.keys(FX).forEach(id=>{ const f=FX[id]; let src=''; ['c1','e1','c2','e2','draw'].forEach(k=>{ if(f&&f[k]) src+=f[k].toString(); });
     const r={S:0,E:0,L:0,any:0}; let m; const re=/\b(al|only)\([^()]*?,'([SEL])'\)/g; while((m=re.exec(src))) r[m[2]]++;
@@ -4367,6 +4383,7 @@ document.addEventListener('click',e=>{
     case 'rules': openModal({type:'rules'}); return;
     case 'cat': openModal({type:'cat'}); return;
     case 'catset': UI.modal=Object.assign({},UI.modal,{set:t.dataset.k}); renderModal(); return;
+    case 'znav': zoomStep(+t.dataset.d); return;
     case 'zoom': openModal({type:'zoom',id:+t.dataset.id,back:UI.modal&&UI.modal.type==='cat'?UI.modal:null}); return;
     case 'zoompl': openModal({type:'zoom',id:+t.dataset.id,pl:NET.on?NET.me:S.turn}); return;
     case 'menu': openModal({type:'confirmmenu'}); return;
