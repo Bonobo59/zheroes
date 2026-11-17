@@ -1474,10 +1474,10 @@ function pickedHTML(ids){ if(!ids||!ids.length) return ''; return `${MOB()?'<hr 
 function draftHTML(){
   const D=S.draft, pl=NET.on?NET.me:D.turn, pack=D.packs[pl];
   if(NET.on){ const sent=UI.draftSent===`${S.game}-${D.round}`; if(UI.dKey!==`${S.game}-${D.round}`){UI.dKey=`${S.game}-${D.round}`;UI.dpick=null;}
-    return `<div class="paper">${phHead('🃏','Draft','Choisis une carte.',[`Tour <b>${D.round+1}</b>/12`,`Deck <b>${P(pl).deck.length}</b>/12`,dirChip(D)])}
+    return `<div class="paper">${phHead('🃏','Draft','',[`Tour <b>${D.round+1}</b>/12`,`Deck <b>${P(pl).deck.length}</b>/12`,dirChip(D)])}
     ${draftPage(pack,UI.dpick,null,!sent)}
     ${sent?'<div class="center" style="margin-top:8px"><button class="waitbtn" disabled>⏳ En attente de l’autre joueur…</button></div>':''}${pickedHTML(P(pl).deck)}</div>`; }
-  return `<div class="paper">${phHead('🃏','Draft','Choisis une carte.',[esc(P(pl).name),`Tour <b>${D.round+1}</b>/12`,`Deck <b>${P(pl).deck.length}</b>/12`,dirChip(D)])}
+  return `<div class="paper">${phHead('🃏','Draft','',[esc(P(pl).name),`Tour <b>${D.round+1}</b>/12`,`Deck <b>${P(pl).deck.length}</b>/12`,dirChip(D)])}
     ${draftPage(pack,D.picked[0],null,D.picked.length===1)}
 ${pickedHTML(P(pl).deck)}</div>`;
 }
@@ -1552,7 +1552,7 @@ function placeHTML(){
   const slots=[0,1,2,3].map(k=>{const id=arr[k];return `<div class="slot ${k===0?'front':''}">${id?`<div data-act="unplace" data-k="${k}" style="position:absolute;inset:0">${cardHTML(pl,id,{})}</div>`:`<span class="num">${k+1}</span>`}</div>`;}).join('');
   const hand=p.hand.filter(id=>!arr.includes(id));
   const o=P(1-pl), vb=v=>`<span class="vpbox ps"><img src="star.webp" alt="étoiles"><b>${v}</b></span>`;
-  return `<div class="paper">${phHead('📍','Positionnement')}<div class="pscore" style="margin-bottom:8px"><span class="pn">${esc(p.name)}</span>${vb(p.vp)}<span class="pvs">–</span>${vb(o.vp)}<span class="pn">${esc(o.name)}</span></div>
+  return `<div class="paper">${MOB()?'':phHead('📍','Positionnement')}<div class="pscore" style="margin-bottom:8px"><span class="pn">${esc(p.name)}</span>${vb(p.vp)}<span class="pvs">–</span>${vb(o.vp)}<span class="pn">${esc(o.name)}</span></div>
     <div class="mid"><div>${numTile(1)}</div><div>${numTile(2)}</div><div>${numTile(3)}</div><div>${numTile(4)}</div></div>
     <div class="side">${slots}</div>
     <div class="spacer"></div><div class="center">${sent?'<button class="waitbtn" disabled>⏳ En attente de l’autre joueur…</button>':`<button data-act="preset" ${arr.length?'':'disabled'}>↺ Recommencer</button> <button class="primary" data-act="pconfirm" ${arr.length===4?'':'disabled'}>Valider le placement</button>`}</div>
@@ -3520,7 +3520,7 @@ function tourHTML(){
   if(T.phase==='draft'){
     const D=T.draft, pack=D.packs[TT.seat], sent=UI.t4sent===D.round;
     if(UI.t4key!==D.round){UI.t4key=D.round;UI.dpick=null;}
-    return `<div class="paper">${phHead('🃏',`Draft à ${T.n||4}`,'Choisis une carte.',[`Tour <b>${D.round+1}</b>/12`,`Deck <b>${D.decks[TT.seat].length}</b>/12`])}
+    return `<div class="paper">${phHead('🃏',`Draft à ${T.n||4}`,'',[`Tour <b>${D.round+1}</b>/12`,`Deck <b>${D.decks[TT.seat].length}</b>/12`])}
       ${draftPage(pack,UI.dpick,'t4-'+D.round,!sent)}
       ${sent?'<div class="center" style="margin-top:8px"><button class="waitbtn" disabled>⏳ En attente de l’autre joueur…</button></div>':''}
       <p class="center muted" style="font-size:14px">Les paquets passent au joueur suivant quand les ${T.n||4} ont choisi.</p>${pickedHTML(D.decks[TT.seat])}</div>`;
