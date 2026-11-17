@@ -316,7 +316,7 @@ b[data-vp].gain{animation:gainvp .35s}
 .vpbox b{font-size:29px;min-width:1ch;text-align:center}
 .vpbox{padding:2px 14px 2px 6px!important}
 .vpbox.gain{animation:vpg .35s}
-.pscore{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 6px;font-size:17px}
+.pscore{display:flex;align-items:center;justify-content:center;gap:10px;margin:0;font-size:17px}
 .pscore .pn{font-weight:bold;max-width:30vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pscore .pvs{font-family:'Permanent Marker';font-size:20px}
 .vpbox.ps{padding:0 10px 0 4px!important}.vpbox.ps img{height:24px}.vpbox.ps b{font-size:20px}
@@ -358,7 +358,7 @@ body.tuto #app{pointer-events:none}
 .lb-hero{text-align:center;padding:10px 0 6px;margin-bottom:12px}
 .lb-biglogo{width:min(300px,70%);display:block;margin:0 auto -6px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.35))}
 .lb-banner{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff9ee;padding:6px 26px 8px;border-radius:6px 10px 7px 12px;transform:rotate(-1.2deg);box-shadow:3px 4px 0 rgba(0,0,0,.25);position:relative;z-index:2}
-.lb-banner h2{margin:0;font-family:'Permanent Marker',inherit;font-size:30px;color:#fff9ee;letter-spacing:.5px}
+.lb-banner h2{margin:0;font-family:'Permanent Marker',cursive;font-size:30px;color:#fff9ee;letter-spacing:.5px}
 .lb-globe{font-size:26px}
 .lb-sub{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
 .lb-pill{display:inline-flex;align-items:center;gap:8px;background:#fffaf0;border:2px solid var(--ink);border-radius:999px;padding:4px 14px;box-shadow:2px 3px 0 rgba(0,0,0,.35);font-size:15px}
@@ -370,7 +370,7 @@ body.tuto #app{pointer-events:none}
 @media (max-width:640px){.lb-banner h2{font-size:24px}.lb-biglogo{width:min(240px,72%)}}
 .lb-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px}
 .lb-logo{width:150px;max-width:34%}
-.lb-title{flex:1;min-width:160px}.lb-title h2{margin:0 0 2px;font-family:'Permanent Marker',inherit;font-size:28px}
+.lb-title{flex:1;min-width:160px}.lb-title h2{margin:0 0 2px;font-family:'Permanent Marker',cursive;font-size:28px}
 .lb-name input{font-size:17px}
 .lb-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
 .lb-grid .lb-wide{grid-column:1/-1}
@@ -409,6 +409,14 @@ body:has(.board) .wrap{padding:4px}
 .board{overflow:hidden}
 /* draft paging */
 .dhead{text-align:center;margin-bottom:6px}
+.phead{text-align:center;margin:2px 0 12px}
+.ph-banner{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff9ee;padding:5px 24px 7px;border-radius:6px 10px 7px 12px;transform:rotate(-1.2deg);box-shadow:3px 4px 0 rgba(0,0,0,.22)}
+.ph-banner h2{margin:0;font-family:'Permanent Marker',cursive;font-size:28px;color:#fff9ee;letter-spacing:.5px;line-height:1.15}
+.ph-ico{font-size:24px}
+.ph-sub{display:block;width:fit-content;max-width:min(560px,94%);margin:10px auto 0;background:#fff4b8;border:1.5px solid rgba(0,0,0,.12);padding:7px 16px;border-radius:3px;transform:rotate(.6deg);box-shadow:2px 3px 0 rgba(0,0,0,.12);font-size:17px;line-height:1.3}
+.ph-chips{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ph-chip{background:#fffaf0;border:2px solid var(--ink);border-radius:999px;padding:2px 12px;font-size:15px;box-shadow:2px 2px 0 rgba(0,0,0,.25)}
+@media (max-width:640px){.ph-banner h2{font-size:22px}.ph-ico{font-size:20px}.ph-sub{font-size:15px}.ph-chip{font-size:13px}}
 .dpager{display:flex;justify-content:center;align-items:center;gap:14px;margin:4px 0 8px}
 .parr{font-size:30px;line-height:1;padding:6px 26px;background:var(--red);color:#fff}
 .parr:disabled{background:#ccc}
@@ -486,7 +494,7 @@ body.vsai .p2lbl{display:none}
 .draft4.dgrid{row-gap:4px;gap:4px 6px;grid-template-columns:repeat(4,1fr)!important}
 .dgrid .cardwrap{position:relative}
 .dgrid .dvalid{white-space:normal;width:max-content;max-width:86%;text-align:center;line-height:1.15}
-.dpnum{position:absolute;top:6px;right:6px;z-index:55;background:#c0392b;color:#fff;font-weight:bold;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;font-size:17px;box-shadow:0 2px 6px rgba(0,0,0,.4);pointer-events:none}
+.dpnum{position:absolute;top:6px;right:6px;z-index:55;background:#2e8b57;color:#fff;font-weight:bold;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;font-size:17px;box-shadow:0 2px 6px rgba(0,0,0,.4);pointer-events:none}
 body:not(.mob) .draft4.dgrid{width:calc(var(--w4,760px)*.82);margin-left:calc(50% - var(--w4,760px)*.41)}
 body.mob .draft4.dgrid{grid-template-columns:repeat(2,1fr)!important;gap:4px 6px}
 body.mob .dvalid{font-size:19px;padding:.45em .9em}
@@ -1450,14 +1458,20 @@ function menuHTML(){
 function draftPage(pack,selId,key,ok){ // toutes les cartes du paquet en grille ; « Valider ? » sur l'illustration de la carte choisie
   return `<div class="draft4 dgrid">${pack.map(id=>`<div class="handcard"><div class="cardwrap" data-act="dpick" data-id="${id}">${cardHTML(null,id,{cls:selId===id?'sel':''})}${ok&&selId===id?'<button class="dvalid" data-act="dconfirm">Valider ?</button>':''}</div></div>`).join('')}</div>`;
 }
+function phHead(ico,title,sub,chips,extra){ // en-tête commun des phases : bandeau titre + consigne + infos
+  chips=(chips||[]).filter(Boolean);
+  return `<div class="phead"><div class="ph-banner"><span class="ph-ico">${ico}</span><h2>${title}</h2></div>
+    ${sub?`<div class="ph-sub">${sub}</div>`:''}${chips.length||extra?`<div class="ph-chips">${chips.map(c=>`<span class="ph-chip">${c}</span>`).join('')}${extra||''}</div>`:''}</div>`;
+}
+const dirChip=D=>(D&&D.packs&&D.packs[2])?(D.dir===1?'↻ sens horaire':'↺ sens anti-horaire'):'';
 function pickedHTML(ids){ if(!ids||!ids.length) return ''; return `${MOB()?'<hr class="dsep">':''}<h3 style="margin-top:12px">Déjà choisies (${ids.length}/12)</h3><div class="pickedgrid draft4 dgrid">${ids.map(id=>`<div class="cardwrap" data-act="zoom" data-id="${id}">${cardHTML(null,id,{})}</div>`).join('')}</div>`; }
 function draftHTML(){
   const D=S.draft, pl=NET.on?NET.me:D.turn, pack=D.packs[pl];
   if(NET.on){ const sent=UI.draftSent===`${S.game}-${D.round}`; if(UI.dKey!==`${S.game}-${D.round}`){UI.dKey=`${S.game}-${D.round}`;UI.dpick=null;}
-    return `<div class="paper"><div class="dhead"><b>Draft</b> · tour ${D.round+1}/12 · deck ${P(pl).deck.length}/12${draftDirHTML(D)}</div>
+    return `<div class="paper">${phHead('🃏','Draft','Choisis <b>1 héros</b> dans le paquet, puis touche « Valider ? ».',[`Tour <b>${D.round+1}</b>/12`,`Deck <b>${P(pl).deck.length}</b>/12`,dirChip(D)])}
     ${draftPage(pack,UI.dpick,null,!sent)}
     ${sent?'<div class="center" style="margin-top:8px"><button class="waitbtn" disabled>⏳ En attente de l’autre joueur…</button></div>':''}${pickedHTML(P(pl).deck)}</div>`; }
-  return `<div class="paper"><div class="dhead"><b>Draft — ${esc(P(pl).name)}</b> · tour ${D.round+1}/12 · deck ${P(pl).deck.length}/12${draftDirHTML(D)}</div>
+  return `<div class="paper">${phHead('🃏','Draft','Choisis <b>1 héros</b> dans le paquet, puis touche « Valider ? ».',[esc(P(pl).name),`Tour <b>${D.round+1}</b>/12`,`Deck <b>${P(pl).deck.length}</b>/12`,dirChip(D)])}
     ${draftPage(pack,D.picked[0],null,D.picked.length===1)}
 ${pickedHTML(P(pl).deck)}</div>`;
 }
@@ -1532,8 +1546,7 @@ function placeHTML(){
   const slots=[0,1,2,3].map(k=>{const id=arr[k];return `<div class="slot ${k===0?'front':''}">${id?`<div data-act="unplace" data-k="${k}" style="position:absolute;inset:0">${cardHTML(pl,id,{})}</div>`:`<span class="num">${k+1}</span>`}</div>`;}).join('');
   const hand=p.hand.filter(id=>!arr.includes(id));
   const o=P(1-pl), vb=v=>`<span class="vpbox ps"><img src="star.webp" alt="étoiles"><b>${v}</b></span>`;
-  return `<div class="paper">
-    <div class="pscore"><span class="pn">${esc(p.name)}</span>${vb(p.vp)}<span class="pvs">–</span>${vb(o.vp)}<span class="pn">${esc(o.name)}</span></div>
+  return `<div class="paper">${phHead('📍','Positionnement','Place tes <b>4 héros</b> : le <b>1</b> combat en premier.',[],`<div class="pscore"><span class="pn">${esc(p.name)}</span>${vb(p.vp)}<span class="pvs">–</span>${vb(o.vp)}<span class="pn">${esc(o.name)}</span></div>`)}
     <div class="mid"><div>${numTile(1)}</div><div>${numTile(2)}</div><div>${numTile(3)}</div><div>${numTile(4)}</div></div>
     <div class="side">${slots}</div>
     <div class="spacer"></div><div class="center">${sent?'<button class="waitbtn" disabled>⏳ En attente de l’autre joueur…</button>':`<button data-act="preset" ${arr.length?'':'disabled'}>↺ Recommencer</button> <button class="primary" data-act="pconfirm" ${arr.length===4?'':'disabled'}>Valider le placement</button>`}</div>
@@ -1605,7 +1618,7 @@ function cocheTop(C){
 function cocheMob(C,p){
   const ids=mancheCards(C.pl), k=rkey()+'-'+C.pl; if(UI.ciKey!==k){UI.ciKey=k;UI.ci=0;} UI.ci=Math.min(Math.max(0,UI.ci||0),ids.length-1);
   const id=ids[UI.ci];
-  return `<div class="paper"><h3 style="margin:0 0 4px">Coche — ${esc(p.name)}</h3>
+  return `<div class="paper">${phHead('✏️','Coche','Répartis tes coches sur tes héros.',[esc(p.name)])}
    ${cocheTop(C)}
    <div class="cthumbs">${ids.map((x,i)=>`<div class="cth ${i===UI.ci?'on':''}" data-act="cpick" data-i="${i}">${cardHTML(C.pl,x,{})}</div>`).join('')}</div>
    <div class="ccar"><button class="parr" data-act="cprev">◀</button><div class="ccard">${cardHTML(C.pl,id,{ia:C.left>0&&!C.done,coche:true,big:true})}</div><button class="parr" data-act="cfwd">▶</button></div>
@@ -1617,7 +1630,7 @@ function cocheMob(C,p){
 function cocheHTML(){
   const C=CO(),p=P(C.pl);
   if(MOB()) return cocheMob(C,p);
-  return `<div class="paper"><h2>Phase COCHE — ${esc(p.name)}</h2>
+  return `<div class="paper">${phHead('✏️','Coche','Répartis tes coches sur tes héros : ATK, VIE, pouvoirs ou allégeances.',[esc(p.name)])}
    ${cocheTop(C)}
    <div class="row" style="justify-content:center;margin:8px 0"><button data-act="cundo" ${C.hist.length?'':'disabled'}>↶ Annuler</button>
 </div>
@@ -3485,7 +3498,7 @@ function tourHTML(){
   if(T.phase==='draft'){
     const D=T.draft, pack=D.packs[TT.seat], sent=UI.t4sent===D.round;
     if(UI.t4key!==D.round){UI.t4key=D.round;UI.dpick=null;}
-    return `<div class="paper"><div class="dhead"><b>Draft à ${T.n||4}</b> · tour ${D.round+1}/12 · deck ${D.decks[TT.seat].length}/12</div>
+    return `<div class="paper">${phHead('🃏',`Draft à ${T.n||4}`,'Choisis <b>1 héros</b> dans le paquet, puis touche « Valider ? ».',[`Tour <b>${D.round+1}</b>/12`,`Deck <b>${D.decks[TT.seat].length}</b>/12`])}
       ${draftPage(pack,UI.dpick,'t4-'+D.round,!sent)}
       ${sent?'<div class="center" style="margin-top:8px"><button class="waitbtn" disabled>⏳ En attente de l’autre joueur…</button></div>':''}
       <p class="center muted" style="font-size:14px">Les paquets passent au joueur suivant quand les ${T.n||4} ont choisi.</p>${pickedHTML(D.decks[TT.seat])}</div>`;
@@ -3538,17 +3551,16 @@ function dpHTML(key,kind,deck,title){
     act='<button class="waitbtn" disabled>⏳ En attente de l’autre joueur…</button>';
   } else if(D.step==='pick'){
     const last=D.sel.length===3?D.sel[2]:null;
-    body=`<p class="center" style="margin:0 0 4px">Choisis les <b>3 héros</b> à améliorer (${D.sel.length}/3).</p>
-      <div class="draft4 dgrid">${D.deck.map(id=>`<div class="handcard"><div class="cardwrap" data-act="dpsel" data-id="${id}">${cardHTML(null,id,{cls:D.sel.includes(id)?'sel':''})}${D.sel.includes(id)?`<span class="dpnum">${D.sel.indexOf(id)+1}</span>`:''}${last===id?'<button class="dvalid" data-act="dpnext">Valider ces 3 cartes ?</button>':''}</div></div>`).join('')}</div>`;
+    body=`<div class="draft4 dgrid">${D.deck.map(id=>`<div class="handcard"><div class="cardwrap" data-act="dpsel" data-id="${id}">${cardHTML(null,id,{cls:D.sel.includes(id)?'sel':''})}${D.sel.includes(id)?`<span class="dpnum">${D.sel.indexOf(id)+1}</span>`:''}${last===id?'<button class="dvalid" data-act="dpnext">Valider ces 3 cartes ?</button>':''}</div></div>`).join('')}</div>`;
   } else {
     const used=Object.values(D.al);
-    body=`${D.step==='anim'?'<p class="center" style="margin:0 0 4px">Tes 3 héros reçoivent +1 ATK, +1 ♥ et leur pouvoir I…</p>':''}
-      <div class="dp3">${D.step==='al'&&MOB()&&D.sel.every(id=>D.al[id])?'<div class="dcwrap"><button class="dcenter" data-act="dpok">✔ Valider</button></div>':''}${D.sel.map(id=>`<div>${cardHTML(null,id,{cs:dpCardState(id),cls:'dpcard'+(D.step==='al'?' alpick':''),ia:D.step==='al'})}
+    body=`<div class="dp3">${D.step==='al'&&MOB()&&D.sel.every(id=>D.al[id])?'<div class="dcwrap"><button class="dcenter" data-act="dpok">✔ Valider</button></div>':''}${D.sel.map(id=>`<div>${cardHTML(null,id,{cs:dpCardState(id),cls:'dpcard'+(D.step==='al'?' alpick':''),ia:D.step==='al'})}
         ${D.step==='al'?`<div class="alpick3">${['S','L','E'].map(k=>{ const own=D.al[id]===k, taken=!own&&used.includes(k); return `<button class="alb ${own?'on':''}" data-act="dpal" data-id="${id}" data-key="${k}" ${taken?'disabled':''} title="${AL_NAMES[k]}"><img src="al${k}.png" alt="${AL_NAMES[k]}"></button>`; }).join('')}</div>`:''}</div>`).join('')}</div>`;
     act=D.step==='al'&&!MOB()?`<button class="primary" data-act="dpok" ${D.sel.every(id=>D.al[id])?'':'disabled'}>Valider mes héros</button>`:'';
   }
   if(D.step==='anim'&&!D.animStarted){ D.animStarted=true; setTimeout(dpAnimate,350); }
-  return `<div class="paper"><div class="dhead"><b>${esc(title)}</b> · préparation du deck</div>${body}
+  const sub=D.done?'Tes héros sont prêts.':D.step==='pick'?'Choisis les <b>3 héros</b> à améliorer.':D.step==='anim'?'Tes 3 héros reçoivent <b>+1 ATK</b>, <b>+1 ♥</b> et leur <b>pouvoir I</b>…':'Donne une <b>allégeance différente</b> à chacun de tes 3 héros.';
+  return `<div class="paper">${phHead('🛠️','Préparation',sub,[esc(title),D.step==='pick'&&!D.done?`Héros choisis <b>${D.sel.length}</b>/3`:''])}${body}
     <div class="center" style="margin-top:8px">${D.done?'':back} ${act}</div></div>`;
 }
 async function dpAnimate(){
@@ -4122,7 +4134,7 @@ function buildHTML(key,title){
   const B=bdEnsure(key), ids=ALL_IDS(), pages=Math.ceil(ids.length/4);
   B.page=Math.min(Math.max(0,B.page),pages-1); const cur=ids.slice(B.page*4,B.page*4+4);
   const wait='<button class="waitbtn" disabled>⏳ En attente de l’autre joueur…</button>';
-  return `<div class="paper"><div class="dhead"><b>${esc(title)}</b> · deck construit · <b>${B.sel.length}/12</b></div>
+  return `<div class="paper">${phHead('🧱','Construction','Choisis les <b>12 héros</b> de ton deck.',[esc(title),`Deck <b>${B.sel.length}</b>/12`])}
     ${B.done?'':`<div class="dpager"><button class="parr" data-act="bdpage" data-d="-1" ${B.page>0?'':'disabled'}>◀</button><span class="pinfo">${B.page+1} / ${pages}</span><button class="parr" data-act="bdpage" data-d="1" ${B.page<pages-1?'':'disabled'}>▶</button></div>
     <div class="draft4">${cur.map(id=>`<div class="handcard"><div class="cardwrap" data-act="bdsel" data-id="${id}">${cardHTML(null,id,{cls:B.sel.includes(id)?'sel':''})}</div>
       <div class="lbl">${B.sel.includes(id)?'<b>✓</b>':''}</div></div>`).join('')}</div>`}
@@ -4149,7 +4161,7 @@ function poolHTML(key,nPlayers,canEdit){
   const Q=plEnsure(key), ids=ALL_IDS(), pages=Math.ceil(ids.length/8);
   Q.page=Math.min(Math.max(0,Q.page),pages-1); const cur=ids.slice(Q.page*8,Q.page*8+8);
   const left=ids.length-Q.ban.length, need=12*nPlayers;
-  return `<div class="paper"><div class="dhead"><b>Pool préconstruit en random</b> · touche une carte pour la bannir</div>
+  return `<div class="paper">${phHead('🎲','Pool aléatoire','Touche une carte pour la <b>bannir</b> du pool.',[])}
     <p class="center" style="margin:0 0 4px">Pool : <b>${left}</b> cartes · ${Q.ban.length} bannie(s)
       ${left<12?'<br><span style="color:#a33">Il faut au moins 12 cartes dans le pool.</span>':left<need?`<br><span class="muted" style="font-size:14px">Moins de ${need} cartes : certains héros pourront se retrouver dans plusieurs decks.</span>`:''}</p>
     <div class="dpager"><button class="parr" data-act="plpage" data-d="-1" ${Q.page>0?'':'disabled'}>◀</button><span class="pinfo">${Q.page+1} / ${pages}</span><button class="parr" data-act="plpage" data-d="1" ${Q.page<pages-1?'':'disabled'}>▶</button></div>
