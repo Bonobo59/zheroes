@@ -881,7 +881,7 @@ function trk(pl,k,n){ const p=S&&S.players&&S.players[pl]; if(!p||!n) return; p.
 function CA(us,n){ if(n<=0) return; arr(us).forEach(u=>{if(!u)return;const c=C(u);const b=c.atk;c.atk=Math.min(10,c.atk+n);if(c.atk>b){ev({t:'atk',pl:u.pl,id:u.id,from:b,to:c.atk});trk(u.pl,'gA',c.atk-b);}if(c.atk>b)fxlog(`${nm(u)} : +${c.atk-b} coche ATK`);}); }
 function CV(us,n){ if(n<=0) return; arr(us).forEach(u=>{if(!u)return;const c=C(u);const b=c.vie;c.vie=Math.min(10,c.vie+n);const g=c.vie-b; if(g>0) trk(u.pl,'gV',g);const onBoard=live(u)&&u.rev&&P(u.pl).line.includes(u);if(g>0){ev({t:'vie',pl:u.pl,id:u.id,from:b,to:c.vie,tok:onBoard});if(onBoard)u.tok+=g;fxlog(`${nm(u)} : +${g} coche ♥`+(onBoard?` et +${g} jeton(s) ♥`:''));}}); }
 function CL(us,...ks){ arr(us).forEach(u=>{if(!u)return;const c=C(u);ks.forEach(k=>{if(!c.al[k]){c.al[k]=true;trk(u.pl,'gL',1);ev({t:'al',pl:u.pl,id:u.id,k});fxlog(`${nm(u)} : allégeance ${ALN[k]} cochée`);}});}); }
-let FXDEFER=null;
+let FXDEFER=null, FXPOST=null;
 function DMG(us,n){ if(n<=0) return; if(FXDEFER){ const src=FXSRC; FXDEFER.push({src,fn:()=>DMG(us,n)}); return; } arr(us).filter(live).forEach(u=>{
   if(u.sh>0){u.sh--;ev({t:'dmg',pl:u.pl,id:u.id,n:0,blocked:true});fxlog(`Le bouclier de ${nm(u)} annule ${n} dégât(s)`);return;}
   const b=u.tok; u.tok=Math.max(Math.min(b,1),b-n); const lost=b-u.tok;
@@ -1164,6 +1164,7 @@ Object.assign(FX[60],{draw:X=>X.allies.filter(u=>isFlash(u)&&u!==X.me).length});
 Object.assign(FX[61],{e1:X=>{X.VP(1);DMG(X.allies,X.v(0,0));}});
 Object.assign(FX[77],{e2:X=>SH(X.behindAll.find(all3))});
 Object.assign(FX[82],{e2:X=>{T(X.allies,1);X.VP(2);}});
+Object.assign(FX[11],{e1:X=>{const f=X.facing;X.bf=f;LOSE(f,3);}, c2:X=>!!X.bf&&X.bf.tok<=0});
 
 }
 
@@ -1189,7 +1190,9 @@ function resolveEffect(e){
   } else fxlog('Pouvoir I non coché');
   if(powOn(e.pl,e.id,2) && F.e2){
     const gate = d.link==='Sinon' ? !ok1 : ok1;
-    if(gate && (!F.c2 || F.c2(X))){ parts[2]=true; F.e2(X); }
+    if(gate&&FXDEFER&&FXDEFER.length&&F.c2&&d.link!=='Sinon'&&FXPOST){ // dégâts simultanés pas encore appliqués : la condition II se vérifie après eux
+      const src=FXSRC, r=parts; FXPOST.push({src,fn:()=>{ if(F.c2(X)){ r[2]=true; F.e2(X); } else fxlog('Pouvoir II : condition non remplie'); }}); }
+    else if(gate && (!F.c2 || F.c2(X))){ parts[2]=true; F.e2(X); }
     else if(d.link!=='Sinon'||!ok1) fxlog('Pouvoir II : condition non remplie');
   }
   if(stOn()){ const c=stCC(e.pl,e.id); if(c){ if(powOn(e.pl,e.id,1)){ if(parts[1]) c[9]++; else c[10]++; } if(powOn(e.pl,e.id,2)&&F.e2){ if(parts[2]) c[11]++; else c[12]++; } } }
@@ -2079,6 +2082,7 @@ function flyThing(fromEl,toEl,html,cls,dur){
 const bq=s=>document.querySelector('#app .board '+s);
 const cardEl=(pl,id)=>bq(`.zc[data-pl="${pl}"][data-id="${id}"]`);
 const tokEl=(pl,id)=>bq(`[data-tok="${pl}-${id}"]`);
+const tokZero=el=>{ const v=el&&el.querySelector('.tv'); return !!v&&(+v.textContent)<=0; };
 function setTok(el,d){ if(!el) return; const v=el.querySelector('.tv'); const n=Math.max(0,(+v.textContent)+d); v.textContent=n; el.classList.toggle('zero',n<=0); bump(el,d>0?'gain':'hit'); }
 async function animateEffect(pre,post,evs){
   UI.armedLocal=null;
@@ -2100,9 +2104,9 @@ async function animateEffect(pre,post,evs){
         await Promise.all(grp.map(async g=>{ const el=tokEl(g.pl,g.id); const dir=g.pl===0?1:-1;
           if(g.blocked){ const sh=bq(`[data-sh="${g.pl}-${g.id}"]`); await flySword(src,sh||el,dir); shieldBreak(sh||el); }
           else if(!g.n){ await flySword(src,el,dir); bump(el,'blocked'); }
-          else { for(let k=0;k<Math.min(g.n,8);k++){ await flySword(src,el,dir); setTok(el,k<Math.min(g.n,8)-1?-1:-(g.n-k)); if(k<g.n-1) await sleep(60); } } })); }
+          else { for(let k=0;k<Math.min(g.n,8);k++){ if(tokZero(el)) break; await flySword(src,el,dir); setTok(el,k<Math.min(g.n,8)-1?-1:-(g.n-k)); if(k<g.n-1) await sleep(60); } } })); }
       else if(e.t==='lose'){ const el=tokEl(e.pl,e.id); const k=Math.min(e.n,6);
-        for(let i=0;i<k;i++){ await flyThing(src,el,'💔','lose'); setTok(el,i<k-1?-1:-(e.n-i)); await sleep(80);} }
+        for(let i=0;i<k;i++){ if(tokZero(el)) break; await flyThing(src,el,'💔','lose'); setTok(el,i<k-1?-1:-(e.n-i)); await sleep(80);} }
       else if(e.t==='vp'){ const q=()=>document.querySelector(`[data-vp="${e.pl}"]`); for(let i=0;i<Math.min(e.n,5);i++){ await flyStraight(src,q(),'<img src="star.webp">','star',360); const el=q(); if(el){el.textContent=(+el.textContent)+1; bump(el.parentElement,'gain');} await sleep(40); } }
       await sleep(120);
     }
@@ -3118,11 +3122,11 @@ function hostTry(){
 function resolveGroup(G){
   const pre=clone(S); S.pending=S.pending.filter(e=>!G.includes(e)); S.armed=[];
   S.fxStep=(S.fxStep||0)+1; S.drawFx=null;
-  const evs=[], lines=[], res=[]; FXDEFER=[];
+  const evs=[], lines=[], res=[]; FXDEFER=[]; FXPOST=[];
   try{ for(const e of G){ const r=resolveEffect(e); res.push(r); evs.push(...FXEV); lines.push(...r.lines.filter(l=>!/Aucun effet/.test(l)).map(l=>DEF[e.id].name+' : '+l)); }
-    const q=FXDEFER; FXDEFER=null;
-    for(const d of q){ FXSRC=d.src; FXEV=[]; FXLOG=[]; d.fn(); evs.push(...FXEV); lines.push(...FXLOG); }
-  } finally { FXDEFER=null; }
+    const q=FXDEFER; FXDEFER=null; const qp=FXPOST; FXPOST=null;
+    for(const d of q.concat(qp)){ FXSRC=d.src; FXEV=[]; FXLOG=[]; d.fn(); evs.push(...FXEV); lines.push(...FXLOG.map(l=>DEF[d.src.id].name+' : '+l)); }
+  } finally { FXDEFER=null; FXPOST=null; }
   cleanupDeaths(); checkEnd();
   const last=res[res.length-1]; S.lastFx={title:'⚡ Pouvoirs simultanés : '+G.map(e=>DEF[e.id].name).join(' + '),lines,pl:last.pl,id:last.id,parts:last.parts};
   const post=clone(S);
