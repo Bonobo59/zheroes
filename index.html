@@ -834,11 +834,13 @@ function finishManche(){
   S.players.forEach(p=>{p.discard=p.discard.concat(p.line.map(u=>u.id),p.ko);p.line=[];p.ko=[];});
   if(S.manche<3){S.manche++;startManche();} else endGame();
 }
+// points de classement d'une partie : [vainqueur, perdant, égalité]
+const PCT=g=>g<=1?[2,0,1]:g<=3?[3,0,1]:g<=5?[4,0,2]:[5,0,2];
 function endGame(){
   if(S.forfeit!=null) return;
   stGameEnd();
   S.players.forEach(p=>{ const a=p.trk0||{}, b=p.trk||{}, d={}; Object.keys(b).forEach(k=>d[k]=(b[k]||0)-(a[k]||0)); p.trkHist=p.trkHist||[]; p.trkHist[S.game-1]=d; });
-  const [a,b]=S.players; const t=S.game<=2?[2,0,1]:S.game<=4?[3,0,1]:[4,0,2];
+  const [a,b]=S.players; const t=PCT(S.game);
   let w=null;
   if(a.vp>b.vp){a.pc+=t[0];b.pc+=t[1];w=a.name;} else if(b.vp>a.vp){b.pc+=t[0];a.pc+=t[1];w=b.name;} else {a.pc+=t[2];b.pc+=t[2];}
   S.results.push({game:S.game,vp:[a.vp,b.vp],winner:w});
@@ -1796,7 +1798,7 @@ function renderModal(){
      <p><b>Bouclier :</b> annule les prochains dégâts subis, puis il est retiré.</p>
      <p><b>Pouvoirs :</b> le pouvoir I est actif quand tous ses ronds sont cochés. Le pouvoir II ne se coche qu’après le I. ET : le II s’applique si la condition du I est remplie. SINON : le II s’applique si elle ne l’est pas.</p>
      <p><b>Dessins :</b> les cartes ✏️ dessinent quand leur condition est remplie (à la révélation pour ⚡, à la destruction pour 💀). « Complet » = tous les dessins faits.</p>
-     <table class="tbl"><tr><th>Parties</th><th>Vainqueur</th><th>Perdant</th><th>Égalité</th></tr><tr><td>1–2</td><td>2</td><td>0</td><td>1</td></tr><tr><td>3–4</td><td>3</td><td>0</td><td>1</td></tr><tr><td>5–6</td><td>4</td><td>0</td><td>2</td></tr></table></div>`;
+     <table class="tbl"><tr><th>Parties</th><th>Vainqueur</th><th>Perdant</th><th>Égalité</th></tr><tr><td>1</td><td>2</td><td>0</td><td>1</td></tr><tr><td>2–3</td><td>3</td><td>0</td><td>1</td></tr><tr><td>4–5</td><td>4</td><td>0</td><td>2</td></tr><tr><td>6</td><td>5</td><td>0</td><td>2</td></tr></table></div>`;
   } else if(m.type==='confirmmenu'){
     body=`<div class="paper center"><h3>Revenir au menu ?</h3><p>${AT.on?'Le tournoi reste enregistré : tu le retrouveras dans « Mes parties » du lobby.':AS.on?'La partie reste enregistrée : tu la retrouveras dans « Mes parties » du lobby.':NET.on?(NET.host?'Ta table sera fermée. Tu pourras la reprendre depuis le salon.':'Tu quittes la table en ligne.'):'La campagne en cours reste sauvegardée sur cet appareil.'}</p><div class="ffbtns"><button data-act="close">Annuler</button><button class="primary" data-act="gomenu">Retour au menu</button>${canForfeit()?'<button class="ffbtn" data-act="ffask">🏳️ Abandonner la partie</button>':''}</div></div>`;
   } else if(m.type==='confirmff'){
@@ -2146,7 +2148,7 @@ function tutoLine(revealed){
 const TSTEPS=[
  {title:'Bienvenue dans Zheroes !',text:'Ce tutoriel t’explique les règles pas à pas. Touche <b>Suivant</b> pour avancer.'},
  {title:'Le but du jeu',text:'Une <b>campagne</b> se joue en <b>6 parties</b> contre le même adversaire. Chaque partie gagnée rapporte des <b>points de classement</b>. À la fin des 6 parties, le joueur qui en a le plus remporte la campagne.'},
- {title:'Une partie',text:'Une partie se joue en <b>3 manches</b>. À chaque manche, on gagne des <b>points de victoire (PV)</b>. Après la 3e manche, celui qui a le plus de PV gagne la partie : 2 points de classement en parties 1–2, 3 en parties 3–4, 4 en parties 5–6.'},
+ {title:'Une partie',text:'Une partie se joue en <b>3 manches</b>. À chaque manche, on gagne des <b>points de victoire (PV)</b>. Après la 3e manche, celui qui a le plus de PV gagne la partie : 2 points de classement en partie 1, 3 en parties 2–3, 4 en parties 4–5 et 5 en partie 6.'},
  {title:'Ton deck',text:'Chaque joueur reçoit <b>12 héros</b> qu’il garde toute la campagne. Au fil des manches, tu vas <b>cocher</b> des cases sur tes cartes pour les rendre plus fortes. C’est le cœur du jeu !'},
  {view:'card',card:1,hl:d=>bb(d.pos.atk,4),title:'L’attaque (ATK)',text:'La colonne de gauche, c’est l’<b>ATK</b> : le nombre de dégâts que le héros inflige en combat. Chaque rond noirci compte pour 1.'},
  {view:'card',card:1,hl:d=>bb(d.pos.vie,4),title:'La vie',text:'Les ronds près du cœur vert, ce sont les <b>coches de vie</b>. Quand le héros est révélé, il reçoit autant de <b>jetons de vie</b> que de ronds cochés.'},
@@ -3534,7 +3536,7 @@ function tourForfeit(seat){ // un humain abandonne le tournoi
   if(humans.length<=1){ clearTimeout(TT.startTimer); T.phase='end'; T.ffEnd=true; T.winner=humans.length?humans[0]:null; tourBroadcast(); return; }
   if(T.phase==='play'){ const ti=tPairs(T.round).findIndex(p=>p.includes(seat));
     if(ti>=0&&!T.done[ti]){ const pr=tPairs(T.round)[ti], o=pr[0]===seat?pr[1]:pr[0], g=T.round+1;
-      T.pc[o]+=g<=2?2:g<=4?3:4; T.wins[o]++; T.results.push({round:T.round,table:ti+1,seats:pr,vp:[0,0],ff:seat});
+      T.pc[o]+=PCT(g)[0]; T.wins[o]++; T.results.push({round:T.round,table:ti+1,seats:pr,vp:[0,0],ff:seat});
       T.ffd=T.ffd||{}; T.ffd[T.round+'-'+seat]=1; T.done[ti]=true;
       if(T.done.every(Boolean)){ tourStandings(T.round+1); return; } } }
   tourBroadcast();
