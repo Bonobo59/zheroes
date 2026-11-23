@@ -704,7 +704,7 @@ const powOn=(pl,id,n)=>{const d=DEF[id],c=cs(pl,id); return n===1? (d.c1>0&&c.p1
 
 function newCampaign(names,mode,set){
   useSet(set||curSetPref());
-  S={set:SETNAME,t0:Date.now(),phase:'setup',mode,game:1,manche:1,players:names.map(n=>({name:n||'Joueur',cs:{},deck:[],line:[],ko:[],discard:[],vp:0,pc:0})),
+  S={set:SETNAME,t0:0,phase:'setup',mode,game:1,manche:1,players:names.map(n=>({name:n||'Joueur',cs:{},deck:[],line:[],ko:[],discard:[],vp:0,pc:0})),
      log:[],pending:[],step:0,turn:0,draft:null,coche:null,results:[]};
   S.stc=stNew(mode,NET.on?'online2':'local',S.players.map(p=>p.name)); S.stc.set=S.set;
   const pool=shuffle(DEFS.map(c=>c.id));
@@ -1299,7 +1299,9 @@ function MOB(){ return MQ.matches; }
 function scrollTop0(){ window.scrollTo(0,0); const a=document.getElementById('app'); if(a) a.scrollTop=0; }
 function setMob(){ document.body.classList.toggle('mob',MOB()); document.documentElement.classList.toggle('mob',MOB()); }
 setMob(); if(MQ.addEventListener) MQ.addEventListener('change',()=>{ setMob(); if(typeof render==='function') render(); });
-function campT0(){ if(TT.on&&TT.T){ if(!TT.T.t0) TT.T.t0=Date.now(); return TT.T.t0; } if(!S.t0) S.t0=Date.now(); return S.t0; }
+function campT0(){ // le chrono démarre quand la campagne est lancée (pas à sa création)
+  if(TT.on&&TT.T){ if(TT.T.phase==='lobby') return Date.now(); if(!TT.T.t0) TT.T.t0=Date.now(); return TT.T.t0; }
+  if((S.phase==='setup'||S.phase==='prep')&&S.game===1&&!S.t0) return Date.now(); if(!S.t0) S.t0=Date.now(); return S.t0; }
 function chronoTxt(){ if(!S) return '0:00'; const t0=campT0(); const end=(S.phase==='campaignEnd'||(TT.on&&TT.T&&TT.T.phase==='end'))?(S.tEnd||(S.tEnd=Date.now())):Date.now();
   const s=Math.max(0,Math.floor((end-t0)/1000)), h=Math.floor(s/3600), m=Math.floor(s/60)%60, x=s%60, p=v=>String(v).padStart(2,'0');
   return h?`${h}:${p(m)}:${p(x)}`:`${m}:${p(x)}`; }
@@ -3262,7 +3264,7 @@ function tSeats(){ return Array.from({length:tN()},(_,i)=>i); }
 function tPairs(r){ const T=TT.T; return (T&&T.pairs&&T.pairs[r])||T4PAIRS[r]; }
 function isAI(s){ return !!(TT.T&&TT.T.ai&&TT.T.ai[s]); }
 function tourNew(mode,n,names,ai){ const z=v=>Array(n).fill(v);
-  return {set:curSetPref(),t0:Date.now(),mode,n,phase:'lobby',names,ai,pc:z(0),vp:z(0),wins:z(0),pdata:z(null),round:0,done:z(false).slice(0,n/2),results:[],draft:null,startAt:0,aiLevel:TT.aiLevel||'normal',
+  return {set:curSetPref(),t0:0,mode,n,phase:'lobby',names,ai,pc:z(0),vp:z(0),wins:z(0),pdata:z(null),round:0,done:z(false).slice(0,n/2),results:[],draft:null,startAt:0,aiLevel:TT.aiLevel||'normal',
     pairs:n===4?T4PAIRS.map(r=>r.map(p=>p.slice())):TSCHED[n].map(r=>r.map(p=>p.slice())).concat([null])}; }
 const tName=s=>TT.T&&TT.T.names[s]||('J'+(s+1));
 
